@@ -25,7 +25,7 @@ class CTesterWindow : public CWindow
 public:
 	CONSTRUCTABLE(CTesterWindow)
 
-	void 				Init(HINSTANCE hInst, char* szName);
+	void 				Init(HINSTANCE hInst, char* szName, CInput* pcInput);
 	void				Kill(void);
 	void 				ActiveTick(void);
 	void				InputEvent(CUnknown* pcSource, void* pvContext);

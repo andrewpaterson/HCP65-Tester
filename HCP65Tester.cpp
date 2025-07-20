@@ -15,9 +15,12 @@ int FAR PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCm
 	D3DDEVTYPE		d3dDevType;
 	char			szTitle[] = "Viewer Release " ENGINE_VERSION;
 	CTesterWindow	gcWindow;
+	CInput			cInput;
 
 	FastFunctionsInit();
 	
+	cInput.Init();
+
 	cConfig.Init();
 	if ((cConfig.miWidth == 0) || (cConfig.miHeight == 0))
 	{
@@ -33,7 +36,7 @@ int FAR PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCm
 	srand((unsigned)time(NULL));
 
 	UnknownsInit();
-	gcWindow.Init(hInstance, szTitle);
+	gcWindow.Init(hInstance, szTitle, &cInput);
 
 	bWindowed = cConfig.mbWindowed;
 
@@ -68,6 +71,8 @@ int FAR PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	gcWindow.WinLoop();
 	gcWindow.Kill();
+
+	cInput.Kill();
 
 	KillMain();
 	FastFunctionsKill();

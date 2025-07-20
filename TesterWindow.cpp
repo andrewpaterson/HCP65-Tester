@@ -5,9 +5,9 @@
 //
 //
 //////////////////////////////////////////////////////////////////////////
-void CTesterWindow::Init(HINSTANCE hInst, char* szName)
+void CTesterWindow::Init(HINSTANCE hInst, char* szName, CInput* pcInput)
 {
-	CWindow::Init(hInst, szName, &mcInput);
+	CWindow::Init(hInst, szName, pcInput);
 }
 
 
