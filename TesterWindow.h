@@ -22,9 +22,8 @@
 class CImageCelGroup;
 class CTesterWindow : public CWindow
 {
+CONSTRUCTABLE(CTesterWindow)
 public:
-	CONSTRUCTABLE(CTesterWindow)
-
 	void 				Init(HINSTANCE hInst, char* szName, CInput* pcInput);
 	void				Kill(void);
 	void 				ActiveTick(void);
