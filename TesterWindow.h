@@ -16,7 +16,6 @@
 #include "BaseLib/WinConfig.h"
 #include "BaseLib/PropertiesFile.h"
 #include "WindowLib/Window.h"
-#include "WindowLib/ComponentFactory.h"
 
 
 class CImageCelGroup;
@@ -24,10 +23,8 @@ class CTesterWindow : public CWindow
 {
 CONSTRUCTABLE(CTesterWindow)
 public:
-	void 				Init(HINSTANCE hInst, char* szName, CInput* pcInput);
+	void 				Init(CNativeWindow* pcNativeWindow);
 	void				Kill(void);
-	void 				ActiveTick(void);
-	void				InputEvent(CUnknown* pcSource, void* pvContext);
 };
 
 

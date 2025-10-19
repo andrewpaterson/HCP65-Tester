@@ -1,3 +1,7 @@
+#include <windows.h>
+#include "BaseLib/FastFunctions.h"
+#include "BaseLib/Logger.h"
+#include "WinGdiLib/WinGDIWindow.h"
 #include "TesterWindow.h"
 
 
@@ -5,77 +9,29 @@
 //
 //
 //////////////////////////////////////////////////////////////////////////
-int FAR PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
+int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	bool			bResult;
-	int				iScreenWidth;
-	int				iScreenHeight;
-	bool			bWindowed;
-	CWinConfig		cConfig;
-	D3DDEVTYPE		d3dDevType;
-	char			szTitle[] = "Viewer Release " ENGINE_VERSION;
-	CTesterWindow	gcWindow;
-	CInput			cInput;
-
+	gcLogger.Init();
 	FastFunctionsInit();
-	
-	cInput.Init();
 
-	cConfig.Init();
-	if ((cConfig.miWidth == 0) || (cConfig.miHeight == 0))
-	{
-		iScreenWidth = CWindow::GetScreenWidth();
-		iScreenHeight = CWindow::GetScreenHeight();
-	}
-	else
-	{
-		iScreenWidth = cConfig.miWidth;
-		iScreenHeight = cConfig.miHeight;
-	}
+	CWinGDIWindow	cNativeWindow;
+	CTesterWindow	cTesterWindow;
 
-	srand((unsigned)time(NULL));
+	cNativeWindow.Init(hInstance, 
+					   hPrevInstance, 
+						nCmdShow,
+					   "HCP65Tester", 
+					   "HCP65 Board Tester");
+	cTesterWindow.Init(&cNativeWindow);
 
-	UnknownsInit();
-	gcWindow.Init(hInstance, szTitle, &cInput);
+	cTesterWindow.Show();
 
-	bWindowed = cConfig.mbWindowed;
+	cTesterWindow.Kill();
+	cNativeWindow.Kill();
 
-	if (cConfig.meMode == WM_DX_HAL)
-		d3dDevType = D3DDEVTYPE_HAL;
-	else if (cConfig.meMode == WM_DX_REF)
-		d3dDevType = D3DDEVTYPE_REF;
-	else if (cConfig.meMode == WM_DX_SW)
-		d3dDevType = D3DDEVTYPE_SW;
 
-	if (bWindowed)
-	{
-		if ((cConfig.miWidth == 0) || (cConfig.miHeight == 0))
-		{
-			iScreenWidth = (int)(iScreenWidth * 0.9f);
-			iScreenHeight = (int)(iScreenHeight * 0.9f);
-		}
-
-		gcWindow.Windowed(nCmdShow, 60, 60, iScreenWidth, iScreenHeight);
-		bResult = InitMain(0, d3dDevType, gcWindow.hWnd, 0, 0, D3DFMT_UNKNOWN, true, false, gcWindow.hWnd);
-	}
-	else
-	{
-		gcWindow.FullScreen(nCmdShow);
-		bResult = InitMain(0, d3dDevType, gcWindow.hWnd, iScreenWidth, iScreenHeight, D3DFMT_X8R8G8B8, true, true, gcWindow.hWnd);
-	}
-
-	if (!bResult)
-	{
-		return 1;
-	}
-
-	gcWindow.WinLoop();
-	gcWindow.Kill();
-
-	cInput.Kill();
-
-	KillMain();
 	FastFunctionsKill();
+	gcLogger.Kill();
 	return 0;
 }
 
