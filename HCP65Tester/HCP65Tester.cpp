@@ -18,10 +18,10 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	CTesterWindow	cTesterWindow;
 
 	cNativeWindow.Init(hInstance, 
-					   hPrevInstance, 
+						hPrevInstance, 
 						nCmdShow,
-					   "HCP65Tester", 
-					   "HCP65 Board Tester");
+						"HCP65Tester", 
+						"HCP65 Board Tester");
 	cTesterWindow.Init(&cNativeWindow);
 
 	cTesterWindow.Show();
