@@ -149,7 +149,6 @@
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -163,23 +162,22 @@
     <ClInclude Include="TesterWindow.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommonLibraries\BaseLib\BaseLib.vcxproj">
+    <ProjectReference Include="..\..\CommonLibraries\BaseLib\BaseLib.vcxproj">
       <Project>{e25d2dac-0e80-42b2-8fa7-99b837cf7588}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\CommonLibraries\ImageLib\ImageLib.vcxproj">
+    <ProjectReference Include="..\..\CommonLibraries\ImageLib\ImageLib.vcxproj">
       <Project>{1f518043-b152-4b9c-9d61-ddd6400420ed}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\CommonLibraries\InputLib\InputLib.vcxproj">
+    <ProjectReference Include="..\..\CommonLibraries\InputLib\InputLib.vcxproj">
       <Project>{2f64aa34-f1cc-43fe-90ee-90e66824ee55}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\CommonLibraries\StandardLib\StandardLib.vcxproj">
+    <ProjectReference Include="..\..\CommonLibraries\StandardLib\StandardLib.vcxproj">
       <Project>{2cfa23fa-6565-4744-8b75-9790b21cc0e5}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\CommonLibraries\WindowLib\WindowLib.vcxproj">
+    <ProjectReference Include="..\..\CommonLibraries\WindowLib\WindowLib.vcxproj">
       <Project>{b5d4c7aa-49ef-45d2-b970-0ab1f1184ae6}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\CommonLibraries\WinGdiLib\WinGdiLib.vcxproj">
+    <ProjectReference Include="..\..\CommonLibraries\WinGdiLib\WinGdiLib.vcxproj">
       <Project>{d42e3a40-2620-4520-bea0-ce1f3e064e08}</Project>
     </ProjectReference>
   </ItemGroup>
