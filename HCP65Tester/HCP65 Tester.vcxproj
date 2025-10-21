@@ -174,6 +174,9 @@
     <ProjectReference Include="..\..\CommonLibraries\StandardLib\StandardLib.vcxproj">
       <Project>{2cfa23fa-6565-4744-8b75-9790b21cc0e5}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\CommonLibraries\SupportLib\SupportLib.vcxproj">
+      <Project>{221022f1-b103-456a-8f55-721f33f2e26d}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\WindowLib\WindowLib.vcxproj">
       <Project>{b5d4c7aa-49ef-45d2-b970-0ab1f1184ae6}</Project>
     </ProjectReference>
