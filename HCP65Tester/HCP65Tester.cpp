@@ -1,7 +1,8 @@
 #include <windows.h>
 #include "BaseLib/FastFunctions.h"
+#include "BaseLib/GlobalMemory.h"
 #include "BaseLib/Logger.h"
-#include "WinGdiLib/WinGDIWindow.h"
+#include "WinGdiLib/WinGDIWindowFactory.h"
 #include "TesterWindow.h"
 
 
@@ -13,23 +14,24 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 {
 	gcLogger.Init();
 	FastFunctionsInit();
+	MemoryInit();
 
-	CWinGDIWindow	cNativeWindow;
-	CTesterWindow	cTesterWindow;
+	CWinGDIWindowFactory	cNativeFactory;
+	CTesterWindow			cTesterWindow;
 
-	cNativeWindow.Init(hInstance, 
-						hPrevInstance, 
-						nCmdShow,
-						"HCP65Tester", 
-						"HCP65 Board Tester");
-	cTesterWindow.Init(&cNativeWindow);
+	cNativeFactory.Init(&gcMemoryAllocator,
+					    hInstance, 
+					    hPrevInstance, 
+					    nCmdShow,
+					    "HCP65Tester");
+	cTesterWindow.Init("HCP65 Board Tester", &cNativeFactory);
 
 	cTesterWindow.Show();
 
 	cTesterWindow.Kill();
-	cNativeWindow.Kill();
 
 
+	MemoryKill();
 	FastFunctionsKill();
 	gcLogger.Kill();
 	return 0;

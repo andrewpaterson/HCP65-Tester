@@ -23,8 +23,8 @@ class CTesterWindow : public CWindow
 {
 CONSTRUCTABLE(CTesterWindow)
 public:
-	void 				Init(CNativeWindow* pcNativeWindow);
-	void				Kill(void);
+	void	Init(char* szWindowTitle, CNativeWindowFactory* pcWindowFactory);
+	void	Kill(void);
 };
 
 

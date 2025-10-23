@@ -5,9 +5,9 @@
 //
 //
 //////////////////////////////////////////////////////////////////////////
-void CTesterWindow::Init(CNativeWindow* pcNativeWindow)
+void CTesterWindow::Init(char* szWindowTitle, CNativeWindowFactory* pcWindowFactory)
 {
-	CWindow::Init(pcNativeWindow);
+	CWindow::Init(szWindowTitle, pcWindowFactory);
 }
 
 
@@ -19,5 +19,4 @@ void CTesterWindow::Kill(void)
 {
 	CWindow::Kill();
 }
-
 
