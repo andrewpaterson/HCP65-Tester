@@ -22,9 +22,16 @@ class CImageCelGroup;
 class CTesterWindow : public CWindow
 {
 CONSTRUCTABLE(CTesterWindow)
+protected:
+	int64	miTime;
+	int32	miX;
+
 public:
 	void	Init(char* szWindowTitle, CNativeWindowFactory* pcWindowFactory);
 	void	Kill(void);
+
+	void	Tick(int64 iUpdateTimeInMillieconds, int64 iTotalTimeInMillieconds);
+	void	CanvasChanged(CCanvas* pcNewCanvas);
 };
 
 
