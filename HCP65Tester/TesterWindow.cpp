@@ -1,3 +1,4 @@
+#include "BaseLib/Chars.h"
 #include "WinGdiLib/WinGDICanvas.h"
 #include "TesterWindow.h"
 
@@ -35,9 +36,9 @@ void CTesterWindow::Tick(int64 iUpdateTimeInMillieconds, int64 iTotalTimeInMilli
     HDC				hMemDC;
     //uint8*          puiPixelData;
 
-	if (iTotalTimeInMillieconds > miTime + 100)
+	if (iTotalTimeInMillieconds > miTime + 16)
 	{
-		miTime = iTotalTimeInMillieconds + 100;
+		miTime = iTotalTimeInMillieconds + 16;
 
         cRect.left = 0;
         cRect.right = mcCanvas.GetWidth();
@@ -51,12 +52,11 @@ void CTesterWindow::Tick(int64 iUpdateTimeInMillieconds, int64 iTotalTimeInMilli
         FillRect(hMemDC, &cRect, blueBrush);
         DeleteObject(blueBrush);
 
-        // Draw a 10x10 grid of colored pixels in memory DC
         for (int x = 50; x < 150; x += 10)
         {
             for (int y = 50; y < 150; y += 10)
             {
-                SetPixel(hMemDC, x + miX, y, RGB(255, 0, 0)); // Red pixels
+                SetPixel(hMemDC, x + miX, y, RGB(255, 255, 255));
             }
         }
 
@@ -77,5 +77,17 @@ void CTesterWindow::Tick(int64 iUpdateTimeInMillieconds, int64 iTotalTimeInMilli
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindow::CanvasChanged(CCanvas* pcNewCanvas)
 {
+    CChars  sz;
+
+    sz.Init("Canvas Changed [");
+    sz.Append(mcCanvas.GetWidth());
+    sz.Append(", ");
+    sz.Append(mcCanvas.GetHeight());
+    sz.Append("] -> [");
+    sz.Append(pcNewCanvas->GetWidth());
+    sz.Append(", ");
+    sz.Append(pcNewCanvas->GetHeight());
+    sz.Append("].\n");
+    sz.DumpKill();
 }
 
