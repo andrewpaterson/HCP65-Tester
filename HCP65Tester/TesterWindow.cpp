@@ -1,5 +1,5 @@
 #include "BaseLib/Chars.h"
-#include "WinGdiLib/WinGDICanvas.h"
+#include "SupportLib/ColourARGB32.h"
 #include "TesterWindow.h"
 
 
@@ -31,32 +31,28 @@ void CTesterWindow::Kill(void)
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindow::Tick(int64 iUpdateTimeInMillieconds, int64 iTotalTimeInMillieconds)
 {
-    RECT            cRect;
-    CWinGDICanvas*  pcNativeCanvas;
-    HDC				hMemDC;
-    //uint8*          puiPixelData;
+    CRectangle      cRect;
+    ARGB32          sGrey;
+    ARGB32          sRed;
 
 	if (iTotalTimeInMillieconds > miTime + 16)
 	{
 		miTime = iTotalTimeInMillieconds + 16;
 
-        cRect.left = 0;
-        cRect.right = mcCanvas.GetWidth();
-        cRect.top = 0;
-        cRect.bottom = mcCanvas.GetHeight();
+        cRect.miLeft = 0;
+        cRect.miRight = mcCanvas.GetWidth();
+        cRect.miTop = 0;
+        cRect.miBottom = mcCanvas.GetHeight();
 
-        pcNativeCanvas = (CWinGDICanvas*)mcCanvas.GetNativeCanvas();
-        hMemDC = pcNativeCanvas->GetMemDC();
+        sGrey = Set32BitColour((uint8)96, 96, 96);
+        mcCanvas.FillRect(&cRect, sGrey);
 
-        HBRUSH blueBrush = CreateSolidBrush(RGB(0, 0, 255));
-        FillRect(hMemDC, &cRect, blueBrush);
-        DeleteObject(blueBrush);
-
-        for (int x = 50; x < 150; x += 10)
+        sRed = Set32BitColour((uint8)255, 96, 255);
+        for (int x = 50; x < 200; x += 10)
         {
-            for (int y = 50; y < 150; y += 10)
+            for (int y = 50; y < 200; y += 10)
             {
-                SetPixel(hMemDC, x + miX, y, RGB(255, 255, 255));
+                mcCanvas.SetPixel(x + miX, y, sRed);
             }
         }
 
@@ -77,17 +73,5 @@ void CTesterWindow::Tick(int64 iUpdateTimeInMillieconds, int64 iTotalTimeInMilli
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindow::CanvasChanged(CCanvas* pcNewCanvas)
 {
-    CChars  sz;
-
-    sz.Init("Canvas Changed [");
-    sz.Append(mcCanvas.GetWidth());
-    sz.Append(", ");
-    sz.Append(mcCanvas.GetHeight());
-    sz.Append("] -> [");
-    sz.Append(pcNewCanvas->GetWidth());
-    sz.Append(", ");
-    sz.Append(pcNewCanvas->GetHeight());
-    sz.Append("].\n");
-    sz.DumpKill();
 }
 

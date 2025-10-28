@@ -1,5 +1,5 @@
-#ifndef __GAME_WINDOW_H__
-#define __GAME_WINDOW_H__
+#ifndef __TESTER_WINDOW_H__
+#define __TESTER_WINDOW_H__
 #include <time.h>
 #include "BaseLib/Define.h"
 #include "BaseLib/Logger.h"
@@ -35,5 +35,5 @@ public:
 };
 
 
-#endif // __GAME_WINDOW_H__
+#endif // __TESTER_WINDOW_H__
 
