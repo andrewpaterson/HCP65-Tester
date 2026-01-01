@@ -152,14 +152,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="Config.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="HCP65Tester.cpp" />
-    <ClCompile Include="TesterWindow.cpp" />
+    <ClCompile Include="TesterWindowData.cpp" />
+    <ClCompile Include="TesterWindowDraw.cpp" />
+    <ClCompile Include="TesterWindowTick.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TesterWindow.h" />
+    <ClInclude Include="TesterWindowData.h" />
+    <ClInclude Include="TesterWindowDraw.h" />
+    <ClInclude Include="TesterWindowTick.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CommonLibraries\BaseLib\BaseLib.vcxproj">
