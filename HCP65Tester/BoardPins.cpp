@@ -41,7 +41,7 @@ void CBoardPins::Kill(void)
 bool CBoardPins::Add(size iPinNumber, char* szPinName, EPinDirection eDirection, EPinSignal eSignal)
 {
 	if ((iPinNumber < 1) ||
-		(iPinNumber > 72))
+		(iPinNumber > 128))
 	{
 		return false;
 	}
@@ -244,5 +244,15 @@ void CBoardPins::GenerateWrite(CChars* psz)
 
 	szLeft.Kill();
 	szRight.Kill();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+size CBoardPins::NumPins(void)
+{
+	return miNumPins;
 }
 

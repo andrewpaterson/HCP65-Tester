@@ -157,6 +157,7 @@
     <ClCompile Include="TesterWindowData.cpp" />
     <ClCompile Include="TesterWindowDraw.cpp" />
     <ClCompile Include="TesterWindowTick.cpp" />
+    <ClCompile Include="UART.cpp" />
     <ClCompile Include="WindowsCOM.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +165,7 @@
     <ClInclude Include="TesterWindowData.h" />
     <ClInclude Include="TesterWindowDraw.h" />
     <ClInclude Include="TesterWindowTick.h" />
+    <ClInclude Include="UART.h" />
     <ClInclude Include="WindowsCOM.h" />
   </ItemGroup>
   <ItemGroup>

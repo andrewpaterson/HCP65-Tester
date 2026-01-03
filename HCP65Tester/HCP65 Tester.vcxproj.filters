@@ -19,6 +19,9 @@
     <ClCompile Include="BoardPins.cpp">
       <Filter>Source\Board</Filter>
     </ClCompile>
+    <ClCompile Include="UART.cpp">
+      <Filter>Source\UART</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -46,6 +49,9 @@
     </ClInclude>
     <ClInclude Include="BoardPins.h">
       <Filter>Source\Board</Filter>
+    </ClInclude>
+    <ClInclude Include="UART.h">
+      <Filter>Source\UART</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

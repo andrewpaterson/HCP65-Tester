@@ -47,8 +47,7 @@ public:
 	void	GenerateLeft(CArrayBit* psArray, CChars* psz);
 	void	GenerateRight(CArrayBit* psArray, CChars* psz);
 	void	GenerateWrite(CChars* psz);
-
-
+	size	NumPins(void);
 };
 
 

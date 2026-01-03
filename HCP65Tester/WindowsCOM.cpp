@@ -1,14 +1,17 @@
 #include "BaseLib/Chars.h"
 #include "BaseLib/Logger.h"
 #include "BaseLib/WindowsError.h"
-#include <windows.h>
 #include <iostream>
 #include <string>
 #include <cstring>  // for strlen
 #include "WindowsCOM.h"
 
 
-HANDLE OpenCOMPort(char* szCOMName)
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+HANDLE OpenWindowsCOMPort(char* szCOMName)
 {
     CChars          szFullName;
     HANDLE          hSerial;
@@ -106,11 +109,10 @@ HANDLE OpenCOMPort(char* szCOMName)
 }
 
 
-bool Send(HANDLE hSerial, char* szMessage)
+bool SendToWindowsCOMPort(HANDLE hSerial, char* szMessage, CChars* pszResult)
 {
-    char* szError;
+    char*           szError;
     DWORD           uiBytesWritten;
-    CChars          sz;
     char            szResponse[1024];
     DWORD           uiBytesRead;
 
@@ -122,48 +124,67 @@ bool Send(HANDLE hSerial, char* szMessage)
         CloseHandle(hSerial);
         return false;
     }
-    else
-    {
-        sz.Init("Sent: ");
-        sz.Append(szMessage);
-        sz.DumpKill();
-    }
 
-    // Read response
     memset(szResponse, 0, 1024);
 
     if (ReadFile(hSerial, szResponse, 1024 - 1, &uiBytesRead, NULL) && uiBytesRead > 0)
     {
-        sz.Init("Received: ");
-        sz.Append(szResponse);
-        sz.DumpKill();
+        if (pszResult)
+        {
+            pszResult->Append(szResponse);
+        }
     }
 
     return true;
 }
 
 
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CloseWindowsCOMPort(HANDLE hSerial)
+{
+    EscapeCommFunction(hSerial, CLRDTR);
+    CloseHandle(hSerial);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
 bool WindowsCOM(void)
 {
     HANDLE          hSerial;
 
-    hSerial = OpenCOMPort("COM4");
+    hSerial = OpenWindowsCOMPort("COM4");
     if (hSerial == INVALID_HANDLE_VALUE)
     {
         return false;
     }
 
-    Send(hSerial, "P\n");
-    Send(hSerial, "O\n");
-    Send(hSerial, "PGb1\n");
-    Send(hSerial, "P5a1\n");
-    Send(hSerial, "PGd1\n");
-    Send(hSerial, "P5c1\n");
-    Send(hSerial, "O67BFFF02080114\n");
-    Send(hSerial, "W\n");
+    SendToWindowsCOMPort(hSerial, "P\n");
+    SendToWindowsCOMPort(hSerial, "O\n");
+    SendToWindowsCOMPort(hSerial, "W\n");
+    SendToWindowsCOMPort(hSerial, "PGb1\n");
+    SendToWindowsCOMPort(hSerial, "P5a1\n");
+    SendToWindowsCOMPort(hSerial, "PGd1\n");
+    SendToWindowsCOMPort(hSerial, "P5c1\n");
+    SendToWindowsCOMPort(hSerial, "O67BFFF02080114\n");
 
-    EscapeCommFunction(hSerial, CLRDTR);
-    CloseHandle(hSerial);
+    CloseWindowsCOMPort(hSerial);
+
     return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool IsWindowsCOMPortSuccess(HANDLE hSerial)
+{
+    return hSerial != INVALID_HANDLE_VALUE;
 }
 
