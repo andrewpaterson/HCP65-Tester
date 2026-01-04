@@ -54,7 +54,7 @@ bool CUART::Send(char* szMessage, CChars* pszResult)
 	bool	bResult;
 
 	szSend.Init(szMessage);
-	szSend.AppendNewLine();
+	szSend.AppendCarriageReturn();
 	bResult = SendToWindowsCOMPort(mhSerial, szSend.Text(), pszResult);
 	szSend.Kill();
 	return bResult;

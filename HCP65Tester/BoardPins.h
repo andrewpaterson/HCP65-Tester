@@ -21,24 +21,69 @@ enum EPinSignal
 	PS_Inverted,
 };
 
+enum EPowerPin
+{
+	PP_Unknown,
+	PP_Ground,
+	PP_5V,
+};
 
-class CBoardPins
+
+class CBusPins
 {
 protected:
-	CMapIntString	mmPinNumbers;
-	CMapStringInt	mmPinNames;
-	CArrayBit		msOutputs;
-	CArrayBit		msInverted;
-	size			miNumPins;
-
-	CArrayBit		msWriteValues;
-	CArrayBit		msReadValues;
+	CMapIntInt	mmBusOffsets;
 
 public:
 	void	Init(void);
 	void	Kill(void);
 
-	bool	Add(size iPinNumber, char* szPinName, EPinDirection eDirection, EPinSignal eSignal);
+	int		Get(int iPinNumber);
+	void	Set(int iPinNumber, int iBusOffset);
+};
+
+
+typedef CMapStringTemplate<CBusPins> CMapStringBusses;
+
+
+class CBoardPins
+{
+protected:
+	CChars				mszName;
+	CChars				mszVersion;
+
+	CMapIntString		mmPinSignals;
+	CMapStringInt		mmPinNames;
+
+	CArrayBit			msOutputs;
+	CArrayBit			msInverted;
+
+	CMapIntInt			mmPinPowers;
+	CMapIntInt			mmPinNoConnects;
+
+	CMapStringBusses	mmBusses;
+
+	size				miNumPins;
+	bool				mbDone;
+
+	CArrayBit			msWriteValues;
+	CArrayBit			msReadValues;
+
+public:
+	void	Init(void);
+	void	Kill(void);
+
+	bool	Done(void);
+
+	void	SetName(char* szName);
+	void	SetVersion(char* szVersion);
+
+	bool	ValidateCanAdd(size iPinNumber, char* szPinName = NULL);
+	bool	AddSignal(size iPinNumber, char* szPinName, EPinDirection eDirection, EPinSignal eSignal);
+	bool	AddPower(size iPinNumber, EPowerPin ePower);
+	bool	AddNoCon(size iPinNumber);
+
+	bool	GroupBus(char* szBusName, char* szPinName, int iBusOffset);
 
 	bool	Set(char* szPinName, bool bValue);
 	bool	Set(size iPinNumber, bool bValue);

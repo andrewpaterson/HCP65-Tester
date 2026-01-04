@@ -1,3 +1,5 @@
+#include "BaseLib/Logger.h"
+#include "BaseLib/LogString.h"
 #include "BoardPins.h"
 
 
@@ -7,14 +9,22 @@
 //////////////////////////////////////////////////////////////////////////
 void CBoardPins::Init(void)
 {
-	mmPinNumbers.Init();
+	mszName.Init();
+	mszVersion.Init();
+
+	mmPinSignals.Init();
 	mmPinNames.Init();
+	mmPinPowers.Init();
+	mmPinNoConnects.Init();
 	msOutputs.Init();
 	msInverted.Init();
+
 	miNumPins = 0;
 
 	msWriteValues.Init();
 	msReadValues.Init();
+
+	mmBusses.Init();
 }
 
 
@@ -24,13 +34,32 @@ void CBoardPins::Init(void)
 //////////////////////////////////////////////////////////////////////////
 void CBoardPins::Kill(void)
 {
+	SMapIterator	sIter;
+	bool			bHasNext;
+	CBusPins*		pcBus;
+
+	bHasNext = mmBusses.StartIteration(&sIter, NULL, NULL, (void**)&pcBus, NULL);
+	while (bHasNext)
+	{
+		pcBus->Kill();
+		bHasNext = mmBusses.Iterate(&sIter, NULL, NULL, (void**)&pcBus, NULL);
+	}
+	mmBusses.Kill();
+		
 	msReadValues.Kill();
 	msWriteValues.Kill();
+
 	msInverted.Kill();
 	msOutputs.Kill();
-	miNumPins = 0;
+	mmPinNoConnects.Kill();
+	mmPinPowers.Kill();
 	mmPinNames.Kill();
-	mmPinNumbers.Kill();
+	mmPinSignals.Kill();
+
+	mszVersion.Kill();
+	mszName.Kill();
+
+	miNumPins = 0;
 }
 
 
@@ -38,38 +67,199 @@ void CBoardPins::Kill(void)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-bool CBoardPins::Add(size iPinNumber, char* szPinName, EPinDirection eDirection, EPinSignal eSignal)
+bool CBoardPins::ValidateCanAdd(size iPinNumber, char* szPinName)
 {
-	if ((iPinNumber < 1) ||
-		(iPinNumber > 128))
+	if (iPinNumber < 1)
 	{
-		return false;
+		return gcLogger.Error2(__METHOD__, " Cannot add Pin numbered [", SizeToString(iPinNumber), "].  It must be greater than zero.", NULL);
+	}
+	else if (iPinNumber > 128)
+	{
+		return gcLogger.Error2(__METHOD__, " Cannot add Pin numbered [", SizeToString(iPinNumber), "].  It must be less than 129.", NULL);
 	}
 
-	if (mmPinNames.HasKey(szPinName))
+	if (szPinName)
 	{
-		return false;
+		if (StrEmpty(szPinName))
+		{
+			return gcLogger.Error2(__METHOD__, " Cannot add an unamed Pin.", NULL);
+		}
+		if (mmPinNames.HasKey(szPinName))
+		{
+			return gcLogger.Error2(__METHOD__, " Cannot add Pin named [", szPinName, "].  It already exists.", NULL);
+		}
 	}
 
-	if (mmPinNumbers.HasKey(iPinNumber))
+	if (mmPinSignals.HasKey(iPinNumber))
+	{
+		return gcLogger.Error2(__METHOD__, " Cannot add Pin numbered [", SizeToString(iPinNumber), "].  It already exists as a signal.", NULL);
+	}
+	if (mmPinPowers.HasKey(iPinNumber))
+	{
+		return gcLogger.Error2(__METHOD__, " Cannot add Pin numbered [", SizeToString(iPinNumber), "].  It already exists as power.", NULL);
+	}
+	if (mmPinNoConnects.HasKey(iPinNumber))
+	{
+		return gcLogger.Error2(__METHOD__, " Cannot add Pin numbered [", SizeToString(iPinNumber), "].  It already exists as a no connect.", NULL);
+	}
+
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::AddSignal(size iPinNumber, char* szPinName, EPinDirection eDirection, EPinSignal eSignal)
+{
+	if (!ValidateCanAdd(iPinNumber, szPinName))
 	{
 		return false;
 	}
 
 	mmPinNames.Put(szPinName, iPinNumber);
-	mmPinNumbers.Put(iPinNumber, szPinName);
+	mmPinSignals.Put(iPinNumber, szPinName);
 
 	msOutputs.GrowTo(iPinNumber);
 	msOutputs.Set(iPinNumber - 1, eDirection == PD_Output);
 
 	msInverted.GrowTo(iPinNumber);
-	msInverted.Set(iPinNumber - 1, eSignal== PS_Inverted);
+	msInverted.Set(iPinNumber - 1, eSignal == PS_Inverted);
 
-	if (miNumPins < iPinNumber)
-	{
-		miNumPins = iPinNumber;
-	}
 	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::AddPower(size iPinNumber, EPowerPin ePower)
+{
+	if (!ValidateCanAdd(iPinNumber))
+	{
+		return false;
+	}
+
+	mmPinPowers.Put(iPinNumber, (int)ePower);
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::AddNoCon(size iPinNumber)
+{
+	if (!ValidateCanAdd(iPinNumber))
+	{
+		return false;
+	}
+
+	mmPinNoConnects.Put(iPinNumber, 0);
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::GroupBus(char* szBusName, char* szPinName, int iBusOffset)
+{
+	CBusPins*	pcBusPins;
+	int			iPinNumber;
+	int			iExistingOffset;
+
+	pcBusPins = mmBusses.Get(szBusName);
+	if (!pcBusPins)
+	{
+		pcBusPins = mmBusses.Put(szBusName);
+		pcBusPins->Init();
+	}
+
+	iPinNumber = (int)mmPinNames.Get(szPinName);
+	if (iPinNumber == -1)
+	{
+		return gcLogger.Error2(__METHOD__, " Cannot add Pin named [", szPinName, "] into Bus [", szBusName, "].  Pin does not exist.", NULL);
+	}
+
+	iExistingOffset = pcBusPins->Get(iPinNumber);
+	if (iExistingOffset != -1)
+	{
+		return gcLogger.Error2(__METHOD__, " Cannot add Pin named [", szPinName, "] into Bus [", szBusName, "].  It already has an offset.", NULL);
+	}
+
+	pcBusPins->Set(iPinNumber, iBusOffset);
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::Done(void)
+{
+	SMapIterator	sIter;
+	bool			bHasNext;
+	int*			piPinNumber;	
+
+	miNumPins = 0;
+
+	bHasNext = mmPinSignals.StartIteration(&sIter, (void**)&piPinNumber, NULL, NULL, NULL);
+	while (bHasNext)
+	{
+		if (miNumPins < (size)(*piPinNumber))
+		{
+			miNumPins = (size)(*piPinNumber);
+		}
+		bHasNext = mmPinSignals.Iterate(&sIter, (void**)&piPinNumber, NULL, NULL, NULL);
+	}
+
+	bHasNext = mmPinPowers.StartIteration(&sIter, (void**)&piPinNumber, NULL, NULL, NULL);
+	while (bHasNext)
+	{
+		if (miNumPins < (size)(*piPinNumber))
+		{
+			miNumPins = (size)(*piPinNumber);
+		}
+		bHasNext = mmPinPowers.Iterate(&sIter, (void**)&piPinNumber, NULL, NULL, NULL);
+	}
+
+	bHasNext = mmPinNoConnects.StartIteration(&sIter, (void**)&piPinNumber, NULL, NULL, NULL);
+	while (bHasNext)
+	{
+		if (miNumPins < (size)(*piPinNumber))
+		{
+			miNumPins = (size)(*piPinNumber);
+		}
+		bHasNext = mmPinNoConnects.Iterate(&sIter, (void**)&piPinNumber, NULL, NULL, NULL);
+	}
+
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::SetName(char* szName)
+{
+	mszName.Set(szName);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::SetVersion(char* szVersion)
+{
+	mszVersion.Set(szVersion);
 }
 
 
@@ -254,5 +444,55 @@ void CBoardPins::GenerateWrite(CChars* psz)
 size CBoardPins::NumPins(void)
 {
 	return miNumPins;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBusPins::Init(void)
+{
+	mmBusOffsets.Init();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBusPins::Kill(void)
+{
+	mmBusOffsets.Kill();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+int CBusPins::Get(int iPinNumber)
+{
+	int* piBusOffset;
+
+	piBusOffset = mmBusOffsets.Get(iPinNumber);
+	if (piBusOffset)
+	{
+		return *piBusOffset;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBusPins::Set(int iPinNumber, int iBusOffset)
+{
+	mmBusOffsets.Put(iPinNumber, iBusOffset);
 }
 
