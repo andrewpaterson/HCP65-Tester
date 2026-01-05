@@ -27,7 +27,7 @@ void SetupAddressDecode(CBoardPins* pcBoard)
 	pcBoard->AddSignal( 2, "Register10", PD_Output, PS_Inverted);
 	pcBoard->AddPower(  3, PP_5V);
 	pcBoard->AddSignal( 4, "Register9", PD_Output, PS_Inverted);
-	pcBoard->AddSignal( 5, "Register8", PD_Input, PS_Inverted);
+	pcBoard->AddSignal( 5, "Register8", PD_Output, PS_Inverted);
 	pcBoard->AddSignal( 6, "Register7", PD_Output, PS_Inverted);
 	pcBoard->AddSignal( 7, "Register6", PD_Output, PS_Inverted);
 	pcBoard->AddSignal( 8, "Register5", PD_Output, PS_Inverted);
@@ -194,6 +194,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	CBoardPins	cBoard;
 	CChars		szOutputCommand;
+	CChars		szWriteCommand;
 	CUART		cUART;
 
 	cBoard.Init();
@@ -205,11 +206,12 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		return 1;
 	}
 
-	USend(&cUART, "P");
-	USend(&cUART, "O");
-	USend(&cUART, "W");
+	USend(&cUART, "POW");
 	USend(&cUART, "PGb1");
 	USend(&cUART, "P5a1");
+	USend(&cUART, "PGd1");
+	USend(&cUART, "P5c1");
+	USend(&cUART, "R0_6");
 
 	szOutputCommand.Init();
 	cBoard.GenerateOutput(&szOutputCommand);
@@ -217,8 +219,35 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	szOutputCommand.Dump();
 	EngineOutput("\n");
 	USend(&cUART, "W");
+	USend(&cUART, szOutputCommand.Text());
 
-	//xxx
+	cBoard.Set("Reset", true);
+	cBoard.Set("Kernal Mode", true);
+	cBoard.Set("RAM Swap", true);
+	szWriteCommand.Init();
+	cBoard.GenerateWrite(&szWriteCommand);
+	USend(&cUART, szWriteCommand.Text());
+	szWriteCommand.Dump();
+	EngineOutput("\n");
+	szWriteCommand.Kill();
+	
+	size uiAddress;
+	uiAddress = 0x10'0000;
+	for (;;)
+	{
+		cBoard.SetBus("Address", uiAddress);
+		szWriteCommand.Init();
+		cBoard.GenerateWrite(&szWriteCommand);
+		USend(&cUART, szWriteCommand.Text());
+		szWriteCommand.Kill();
+
+		USend(&cUART, "RR");
+		uiAddress += 0x4000;
+		if (uiAddress == 0x20'0000)
+		{
+			uiAddress = 0x10'0000;
+		}
+	}
 
 	szOutputCommand.Kill();
 

@@ -1,5 +1,6 @@
 #include "BaseLib/Logger.h"
 #include "BaseLib/LogString.h"
+#include "BaseLib/DebugOutput.h"
 #include "BoardPins.h"
 
 
@@ -122,7 +123,7 @@ bool CBoardPins::AddSignal(size iPinNumber, char* szPinName, EPinDirection eDire
 	mmPinSignals.Put(iPinNumber, szPinName);
 
 	msOutputs.GrowTo(iPinNumber);
-	msOutputs.Set(iPinNumber - 1, eDirection == PD_Output);
+	msOutputs.Set(iPinNumber - 1, eDirection == PD_Input);
 
 	msInverted.GrowTo(iPinNumber);
 	msInverted.Set(iPinNumber - 1, eSignal == PS_Inverted);
@@ -239,6 +240,12 @@ bool CBoardPins::Done(void)
 		bHasNext = mmPinNoConnects.Iterate(&sIter, (void**)&piPinNumber, NULL, NULL, NULL);
 	}
 
+	msWriteValues.GrowTo(miNumPins);
+	msWriteValues.Zero();
+
+	msReadValues.GrowTo(miNumPins);
+	msReadValues.Zero();
+	
 	return true;
 }
 
@@ -285,6 +292,49 @@ bool CBoardPins::Set(char* szPinName, bool bValue)
 //
 //
 //////////////////////////////////////////////////////////////////////////
+void CBoardPins::SetZero(void)
+{
+	msWriteValues.Zero();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::SetBus(char* szBusName, uint32 uiBusValues)
+{
+	int				iPinNumber;
+	int				iBusOffset;
+	CBusPins*		pcBus;
+	SMapIterator	sIter;
+	bool			bHasNext;
+	uint32			uiMask;
+	bool			bValue;
+	
+	pcBus = mmBusses.Get(szBusName);
+	if (!pcBus)
+	{
+		gcLogger.Error2(__METHOD__, " Cannot find a Bus named [", szBusName, "].");
+	}
+
+	bHasNext = pcBus->StartIteration(&sIter, &iPinNumber, &iBusOffset);
+	while (bHasNext)
+	{
+		uiMask = 1 << iBusOffset;
+		bValue = uiMask & uiBusValues;
+		Set(iPinNumber, bValue);
+		bHasNext = pcBus->Iterate(&sIter, &iPinNumber, &iBusOffset);
+	}
+
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
 bool CBoardPins::Set(size iPinNumber, bool bValue)
 {
 	if ((iPinNumber < 1) ||
@@ -293,7 +343,6 @@ bool CBoardPins::Set(size iPinNumber, bool bValue)
 		return false;
 	}
 
-	msWriteValues.GrowTo(iPinNumber);
 	msWriteValues.Set(iPinNumber - 1, bValue);
 	return true;
 }
@@ -316,7 +365,7 @@ void CBoardPins::GenerateLeft(CArrayBit* psArray, CChars* psz)
 	iCount = 0;
 	for (ui = uiHalfPins-1; ui != SIZE_MAX ; ui--)
 	{
-		bValue = !psArray->Get(ui);
+		bValue = psArray->Get(ui);
 
 		if (iCount == 0)
 		{
@@ -361,7 +410,7 @@ void CBoardPins::GenerateRight(CArrayBit* psArray, CChars* psz)
 	iCount = 0;
 	for (ui = uiHalfPins; ui < miNumPins; ui++)
 	{
-		bValue = !psArray->Get(ui);
+		bValue = psArray->Get(ui);
 
 		if (iCount == 0)
 		{
@@ -451,6 +500,28 @@ size CBoardPins::NumPins(void)
 //
 //
 //////////////////////////////////////////////////////////////////////////
+void CBoardPins::DumpRead(void)
+{
+	msReadValues.Dump();
+	EngineOutput("\n");
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::DumpWrite(void)
+{
+	msWriteValues.Dump();
+	EngineOutput("\n");
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
 void CBusPins::Init(void)
 {
 	mmBusOffsets.Init();
@@ -494,5 +565,45 @@ int CBusPins::Get(int iPinNumber)
 void CBusPins::Set(int iPinNumber, int iBusOffset)
 {
 	mmBusOffsets.Put(iPinNumber, iBusOffset);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBusPins::StartIteration(SMapIterator* psIter, int* piPinNumber, int* piBusOffset)
+{
+	bool	bHasNext;
+	int*	pi1;
+	int*	pi2;
+
+	bHasNext = mmBusOffsets.StartIteration(psIter, (void**)&pi1, NULL, (void**)&pi2, NULL);
+	if (bHasNext)
+	{
+		*piPinNumber = *pi1;
+		*piBusOffset = *pi2;
+	}
+	return bHasNext;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBusPins::Iterate(SMapIterator* psIter, int* piPinNumber, int* piBusOffset)
+{
+	bool	bHasNext;
+	int*	pi1;
+	int*	pi2;
+
+	bHasNext = mmBusOffsets.Iterate(psIter, (void**)&pi1, NULL, (void**)&pi2, NULL);
+	if (bHasNext)
+	{
+		*piPinNumber = *pi1;
+		*piBusOffset = *pi2;
+	}
+	return bHasNext;
 }
 

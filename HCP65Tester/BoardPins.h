@@ -40,6 +40,9 @@ public:
 
 	int		Get(int iPinNumber);
 	void	Set(int iPinNumber, int iBusOffset);
+
+	bool	StartIteration(SMapIterator* psIter, int* piPinNumber, int* piBusOffset);
+	bool	Iterate(SMapIterator* psIter, int* piPinNumber, int* piBusOffset);
 };
 
 
@@ -87,12 +90,17 @@ public:
 
 	bool	Set(char* szPinName, bool bValue);
 	bool	Set(size iPinNumber, bool bValue);
+	bool	SetBus(char* szBusName, uint32 uiBusValues);
+	void	SetZero(void);
 
 	void	GenerateOutput(CChars* psz);
 	void	GenerateLeft(CArrayBit* psArray, CChars* psz);
 	void	GenerateRight(CArrayBit* psArray, CChars* psz);
 	void	GenerateWrite(CChars* psz);
 	size	NumPins(void);
+
+	void	DumpRead(void);
+	void	DumpWrite(void);
 };
 
 
