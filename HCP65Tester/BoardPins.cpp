@@ -26,6 +26,7 @@ void CBoardPins::Init(void)
 	msReadValues.Init();
 
 	mmBusses.Init();
+	mmPinBusses.Init();
 }
 
 
@@ -38,6 +39,8 @@ void CBoardPins::Kill(void)
 	SMapIterator	sIter;
 	bool			bHasNext;
 	CBusPins*		pcBus;
+
+	mmPinBusses.Kill();
 
 	bHasNext = mmBusses.StartIteration(&sIter, NULL, NULL, (void**)&pcBus, NULL);
 	while (bHasNext)
@@ -192,6 +195,8 @@ bool CBoardPins::GroupBus(char* szBusName, char* szPinName, int iBusOffset)
 	{
 		return gcLogger.Error2(__METHOD__, " Cannot add Pin named [", szPinName, "] into Bus [", szBusName, "].  It already has an offset.", NULL);
 	}
+
+	mmPinBusses.Put(iPinNumber, szBusName);
 
 	pcBusPins->Set(iPinNumber, iBusOffset);
 	return true;
@@ -490,6 +495,240 @@ void CBoardPins::GenerateWrite(CChars* psz)
 //
 //
 //////////////////////////////////////////////////////////////////////////
+void CBoardPins::GeneratePower(CChars* psz)
+{
+	psz->Append("P");
+
+	if (IsGroundStyleD())
+	{
+		psz->Append("Gd1");
+	}
+	if (IsGroundStyleC())
+	{
+		psz->Append("Gc1");
+	}
+
+	if (Is5VStyleC())
+	{
+		psz->Append("5c1");
+	}
+	if (Is5VStyleB())
+	{
+		psz->Append("5b1");
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::UpdateRead(CChars* pszReadResult)
+{
+	size		iCount;
+	size		uiHalfPins;
+	size		ui;
+	char		c;
+	size		uiNybble;
+	size		uiLength;
+	size		uj;
+	size		uiMask;
+	size		iPinNumber;
+	bool		bOutput;
+	bool		bNoConnect;
+	bool		bPower;
+	bool		bBit;
+
+	uiHalfPins = miNumPins / 2;
+	iCount = miNumPins;
+
+	msReadValues.Zero();
+	uiLength = pszReadResult->Length() - 3;  //R, \r and \n
+	for (ui = 0; ui < uiLength; ui++)
+	{
+		c = pszReadResult->GetChar(ui + 1);
+		c = ToLower(c);
+		uiNybble = GetCharHex(c);
+		if (uiNybble == SIZE_MAX)
+		{
+			return;
+		}
+
+		for (uj = 0; uj < 4; uj++)
+		{
+			if (iCount > uiHalfPins)
+			{
+				iPinNumber = miNumPins - iCount + uiHalfPins + 1;
+			}
+			else
+			{
+				iPinNumber = iCount;
+			}
+
+			bOutput = !msOutputs.Get(iPinNumber - 1);
+			bPower = mmPinPowers.HasKey(iPinNumber);
+			bNoConnect = mmPinNoConnects.HasKey(iPinNumber);
+			mmPinNoConnects.Get(iPinNumber);
+			uiMask = 1 << (3 - uj);
+			bBit = uiNybble & uiMask;
+			msReadValues.Set(iPinNumber - 1, bBit);
+
+			iCount--;
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::GenerateRead(CChars* psz)
+{
+	psz->Append("R0_");
+	psz->Append((int)(miNumPins / 8) - 1);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::IsGroundStyleD(void)
+{
+	EPowerPin	*piG0, *piG1, *piG2, *piG3;
+	bool		 bG0,   bG1,   bG2,   bG3;
+
+	piG0 = NULL;
+	piG1 = NULL;
+	piG2 = NULL;
+	piG3 = NULL;
+
+	if (miNumPins == 24)
+	{
+		piG0 = (EPowerPin*)mmPinPowers.Get(4);
+		piG1 = (EPowerPin*)mmPinPowers.Get(9);
+		piG2 = (EPowerPin*)mmPinPowers.Get(16);
+		piG3 = (EPowerPin*)mmPinPowers.Get(21);
+	}
+	else if (miNumPins == 56)
+	{
+		piG0 = (EPowerPin*)mmPinPowers.Get(9);
+		piG1 = (EPowerPin*)mmPinPowers.Get(20);
+		piG2 = (EPowerPin*)mmPinPowers.Get(37);
+		piG3 = (EPowerPin*)mmPinPowers.Get(48);
+	}
+
+	bG0 = piG0 && ((*piG0) == PP_Ground);
+	bG1 = piG1 && ((*piG1) == PP_Ground);
+	bG2 = piG2 && ((*piG2) == PP_Ground);
+	bG3 = piG3 && ((*piG3) == PP_Ground);
+
+	if (bG0 && bG1 && bG2 && bG3)
+	{
+		return true;
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::IsGroundStyleC(void)
+{
+	EPowerPin	*piG;
+	bool		 bG;
+
+	piG = NULL;
+
+	if (miNumPins == 24)
+	{
+		piG = (EPowerPin*)mmPinPowers.Get(13);
+	}
+	else if (miNumPins == 56)
+	{
+		piG = (EPowerPin*)mmPinPowers.Get(56);
+	}
+
+	bG = piG && ((*piG) == PP_Ground);
+
+	if (bG)
+	{
+		return true;
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::Is5VStyleC(void)
+{
+	EPowerPin	*pi50, *pi51;
+	bool	 	 b50,	b51;
+
+	pi50 = NULL;
+	pi51 = NULL;
+
+	if (miNumPins == 24)
+	{
+		pi50 = (EPowerPin*)mmPinPowers.Get(1);
+		pi51 = (EPowerPin*)mmPinPowers.Get(23);
+	}
+	else if (miNumPins == 56)
+	{
+		pi50 = (EPowerPin*)mmPinPowers.Get(3);
+		pi51 = (EPowerPin*)mmPinPowers.Get(31);
+	}
+
+	b50 = pi50 && ((*pi50) == PP_5V);
+	b51 = pi51 && ((*pi50) == PP_5V);
+	if (b50 && b51)
+	{
+		return true;
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::Is5VStyleB(void)
+{
+	EPowerPin	*pi5;
+	bool	 	 b5;
+
+	pi5 = NULL;
+
+	if (miNumPins == 24)
+	{
+		pi5 = (EPowerPin*)mmPinPowers.Get(8);
+
+	}
+	else if (miNumPins == 56)
+	{
+		pi5 = (EPowerPin*)mmPinPowers.Get(28);
+	}
+
+	b5 = pi5 && ((*pi5) == PP_5V);
+	if (b5)
+	{
+		return true;
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
 size CBoardPins::NumPins(void)
 {
 	return miNumPins;
@@ -500,10 +739,9 @@ size CBoardPins::NumPins(void)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-void CBoardPins::DumpRead(void)
+char* CBoardPins::GetPin(size iPinNumber)
 {
-	msReadValues.Dump();
-	EngineOutput("\n");
+	return mmPinSignals.Get((int)iPinNumber);
 }
 
 
@@ -511,10 +749,328 @@ void CBoardPins::DumpRead(void)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-void CBoardPins::DumpWrite(void)
+void CBoardPins::PrintPin(CChars* psz, CArrayBit* pcBits, size iPinNumber)
 {
-	msWriteValues.Dump();
-	EngineOutput("\n");
+	bool		bBit;
+	char*		szPinName;
+	bool		bInverted;
+	bool		bBusMember;
+
+	bBusMember = mmPinBusses.HasKey(iPinNumber);
+	if (!bBusMember)
+	{
+		bBit = pcBits->Get(iPinNumber - 1);
+		bInverted = msInverted.Get(iPinNumber - 1);
+		szPinName = GetPin(iPinNumber);
+
+		if (bInverted)
+		{
+			psz->Append("/");
+		}
+		psz->Append(szPinName);
+
+		psz->Append(": ");
+		if (bBit)
+		{
+			psz->Append('1');
+		}
+		else
+		{
+			psz->Append('0');
+		}
+		psz->AppendNewLine();
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::PrintPinActive(CChars* psz, CArrayBit* pcBits, size iPinNumber)
+{
+	bool		bBit;
+	bool		bInverted;
+	char*		szPinName;
+	bool		bBusMember;
+
+	bBusMember = mmPinBusses.HasKey(iPinNumber);
+	if (!bBusMember)
+	{
+		bBit = pcBits->Get(iPinNumber - 1);
+		bInverted = msInverted.Get(iPinNumber - 1);
+		if (bBit != bInverted)
+		{
+			if (bInverted)
+			{
+				psz->Append("/");
+			}
+			szPinName = GetPin(iPinNumber);
+			psz->Append(szPinName);
+			psz->AppendNewLine();
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::IsBusRead(CBusPins* pcBusPins)
+{
+	SMapIterator	sIter;
+	int				iPinNumber;
+	int				iOffset;
+	bool			bHasNext;
+	bool			bOutput;
+
+	bHasNext = pcBusPins->StartIteration(&sIter, &iPinNumber, &iOffset);
+	while (bHasNext)
+	{
+		bOutput = !msOutputs.Get(iPinNumber - 1);
+		if (bOutput)
+		{
+			return true;
+		}
+		bHasNext = pcBusPins->Iterate(&sIter, &iPinNumber, &iOffset);
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::IsBusWrite(CBusPins* pcBusPins)
+{
+	SMapIterator	sIter;
+	int				iPinNumber;
+	int				iOffset;
+	bool			bHasNext;
+	bool			bInput;
+
+	bHasNext = pcBusPins->StartIteration(&sIter, &iPinNumber, &iOffset);
+	while (bHasNext)
+	{
+		bInput = msOutputs.Get(iPinNumber - 1);
+		if (bInput)
+		{
+			return true;
+		}
+		bHasNext = pcBusPins->Iterate(&sIter, &iPinNumber, &iOffset);
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::PrintBus(CChars* psz, CArrayBit* pcBits, CBusPins* pcBusPins, char* pszName)
+{
+	SMapIterator	sIter;
+	int				iPinNumber;
+	int				iOffset;
+	bool			bHasNext;
+	bool			bBit;
+	uint32			uiBusValue;
+
+	psz->Append(pszName);
+	psz->Append(": ");
+
+	uiBusValue = 0;
+	bHasNext = pcBusPins->StartIteration(&sIter, &iPinNumber, &iOffset);
+	while (bHasNext)
+	{
+		bBit = pcBits->Get(iPinNumber - 1);
+		if (bBit)
+		{
+			uiBusValue |= 1 << iOffset;
+		}
+		bHasNext = pcBusPins->Iterate(&sIter, &iPinNumber, &iOffset);
+	}
+	psz->Append(uiBusValue, 16);
+	psz->AppendNewLine();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::PrintRead(CChars* psz, bool bOnlyActive)
+{
+	size			iPinNumber;
+	char*			szPinName;
+	bool			bOutput;
+	bool			bNoConnect;
+	bool			bPower;
+	bool			bBit;
+	bool			bExpected;
+	SMapIterator	sIter;
+	bool			bHasNext;
+	CBusPins*		pcBus;
+	char*			szBusName;
+	bool			bFailed;
+
+	bFailed = false;
+	psz->Append("Outputs from board");
+	if (bOnlyActive)
+	{
+		psz->Append(" (only active)");
+	}
+	psz->AppendNewLine();
+
+	bHasNext = mmBusses.StartIteration(&sIter, (void**)&szBusName, NULL, (void**)&pcBus, NULL);
+	while (bHasNext)
+	{
+		if (IsBusRead(pcBus))
+		{
+			PrintBus(psz, &msReadValues, pcBus, szBusName);
+		}
+		bHasNext = mmBusses.Iterate(&sIter, (void**)&szBusName, NULL, (void**)&pcBus, NULL);
+	}
+
+	for (iPinNumber = 1; iPinNumber <= miNumPins; iPinNumber++)
+	{
+		bOutput = !msOutputs.Get(iPinNumber - 1);
+		bPower = mmPinPowers.HasKey(iPinNumber);
+		bNoConnect = mmPinNoConnects.HasKey(iPinNumber);
+
+		if (!bPower && !bNoConnect)
+		{
+			if (bOutput)
+			{
+				if (!bOnlyActive)
+				{
+					PrintPin(psz, &msReadValues, iPinNumber);
+				}
+				else
+				{
+					PrintPinActive(psz, &msReadValues, iPinNumber);
+				}
+			}
+			else
+			{
+				bBit = msReadValues.Get(iPinNumber - 1);
+				bExpected = msWriteValues.Get(iPinNumber - 1);
+				if (bBit != bExpected)
+				{
+					szPinName = GetPin(iPinNumber);
+					psz->Append(szPinName);
+					psz->Append(": Write[");
+					if (bExpected)
+					{
+						psz->Append('1');
+					}
+					else
+					{
+						psz->Append('0');
+					}
+					psz->Append("] Read[");
+					if (bBit)
+					{
+						psz->Append('1');
+					}
+					else
+					{
+						psz->Append('0');
+					}
+					psz->Append("]");
+					psz->AppendNewLine();
+					bFailed = true;
+				}
+			}
+		}
+	}
+	return !bFailed;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::PrintWrite(CChars* psz, bool bOnlyActive)
+{
+	size			iPinNumber;
+	bool			bOutput;
+	bool			bNoConnect;
+	bool			bPower;
+	SMapIterator	sIter;
+	bool			bHasNext;
+	CBusPins*		pcBus;
+	char*			szBusName;
+
+	psz->Append("Inputs into board");
+	if (bOnlyActive)
+	{
+		psz->Append(" (only active)");
+	}
+	psz->AppendNewLine();
+
+	bHasNext = mmBusses.StartIteration(&sIter, (void**)&szBusName, NULL, (void**)&pcBus, NULL);
+	while (bHasNext)
+	{
+		if (IsBusWrite(pcBus))
+		{
+			PrintBus(psz, &msWriteValues, pcBus, szBusName);
+		}
+		bHasNext = mmBusses.Iterate(&sIter, (void**)&szBusName, NULL, (void**)&pcBus, NULL);
+	}
+
+	for (iPinNumber = 1; iPinNumber <= miNumPins; iPinNumber++)
+	{
+		bOutput = !msOutputs.Get(iPinNumber - 1);
+		bPower = mmPinPowers.HasKey(iPinNumber);
+		bNoConnect = mmPinNoConnects.HasKey(iPinNumber);
+
+		if (!bPower && !bNoConnect)
+		{
+			if (!bOutput)
+			{
+				if (!bOnlyActive)
+				{
+					PrintPin(psz, &msWriteValues, iPinNumber);
+				}
+				else
+				{
+					PrintPinActive(psz, &msWriteValues, iPinNumber);
+				}
+			}
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::DumpRead(bool bOnlyActive)
+{
+	CChars	sz;
+	
+	sz.Init();
+	PrintRead(&sz, bOnlyActive);
+	sz.DumpKill();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CBoardPins::DumpWrite(bool bOnlyActive)
+{
+	CChars	sz;
+
+	sz.Init();
+	PrintWrite(&sz, bOnlyActive);
+	sz.DumpKill();
 }
 
 

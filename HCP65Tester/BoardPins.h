@@ -65,6 +65,7 @@ protected:
 	CMapIntInt			mmPinNoConnects;
 
 	CMapStringBusses	mmBusses;
+	CMapIntString		mmPinBusses;
 
 	size				miNumPins;
 	bool				mbDone;
@@ -94,13 +95,34 @@ public:
 	void	SetZero(void);
 
 	void	GenerateOutput(CChars* psz);
+	void	GenerateWrite(CChars* psz);
 	void	GenerateLeft(CArrayBit* psArray, CChars* psz);
 	void	GenerateRight(CArrayBit* psArray, CChars* psz);
-	void	GenerateWrite(CChars* psz);
+	void	GeneratePower(CChars* psz);
+	void	GenerateRead(CChars* psz);
+	
+	void	UpdateRead(CChars* pszReadResult);
+
+	bool	IsGroundStyleD(void);
+	bool	IsGroundStyleC(void);
+	bool	Is5VStyleC(void);
+	bool	Is5VStyleB(void);
+
+	char*	GetPin(size iPinNumber);
+
 	size	NumPins(void);
 
-	void	DumpRead(void);
-	void	DumpWrite(void);
+	bool	PrintRead(CChars* psz, bool bOnlyActive);
+	void	PrintWrite(CChars* psz, bool bOnlyActive);
+	void	DumpRead(bool bOnlyActive);
+	void	DumpWrite(bool bOnlyActive);
+
+protected:
+	void	PrintPin(CChars* psz, CArrayBit* pcBits, size iPinNumber);
+	void	PrintPinActive(CChars* psz, CArrayBit* pcBits, size iPinNumber);
+	bool	IsBusRead(CBusPins* pcBusPins);
+	bool	IsBusWrite(CBusPins* pcBusPins);
+	void	PrintBus(CChars* psz, CArrayBit* pcBits, CBusPins* pcBusPins, char* pszName);
 };
 
 
