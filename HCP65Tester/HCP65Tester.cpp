@@ -175,7 +175,7 @@ int TestDebugBoard(CBoardPins* pcBoard, CUART* pcUART)
 	return 0;
 }
 
-bool TestBoard(void)
+bool TestBoardAddressDecode(void)
 {
 	CBoardPins	cBoard;
 	CChars		szOutputCommand;
@@ -199,8 +199,7 @@ bool TestBoard(void)
 	}
 
 	USend(&cUART, "POW");
-	USend(&cUART, "PGb1");
-	USend(&cUART, "P5a1");
+	USend(&cUART, "PGb15a1");
 
 	szPowerCommand.Init();
 	cBoard.GeneratePower(&szPowerCommand);
@@ -313,6 +312,96 @@ bool TestBoard(void)
 }
 
 
+bool TestBoardRAMROM(void)
+{
+	CBoardPins	cBoard;
+	CChars		szOutputCommand;
+	CChars		szWriteCommand;
+	CChars		szPowerCommand;
+	CChars		szReadCommand;
+	CUART		cUART;
+	CChars		szPrevRead;
+
+	cBoard.Init();
+	SetupAddressDecode(&cBoard);
+
+	cUART.Init("COM3");
+	if (!cUART.Open())
+	{
+		return false;
+	}
+
+	USend(&cUART, "POW");
+	USend(&cUART, "PGb15a1");
+
+	szPowerCommand.Init();
+	cBoard.GeneratePower(&szPowerCommand);
+	USend(&cUART, szPowerCommand.Text());
+	szPowerCommand.Dump();
+	EngineOutput("\n");
+	szPowerCommand.Kill();
+
+	szReadCommand.Init();
+	cBoard.GenerateRead(&szReadCommand);
+	USend(&cUART, szReadCommand.Text());
+	szReadCommand.Dump();
+	EngineOutput("\n");
+	szReadCommand.Kill();
+
+	szOutputCommand.Init();
+	cBoard.GenerateOutput(&szOutputCommand);
+	USend(&cUART, szOutputCommand.Text());
+	szOutputCommand.Dump();
+	EngineOutput("\n");
+	USend(&cUART, "W");
+	USend(&cUART, szOutputCommand.Text());
+
+	szWriteCommand.Init();
+	cBoard.GenerateWrite(&szWriteCommand);
+	USend(&cUART, szWriteCommand.Text());
+	szWriteCommand.Dump();
+	EngineOutput("\n");
+	szWriteCommand.Kill();
+
+	EngineOutput("\n");
+
+	szPrevRead.Init();
+	size uiAddress;
+	cBoard.Set("Reset", false);
+	cBoard.Set("Kernal Mode", true);
+	cBoard.Set("RAM Swap", true);
+
+	uiAddress = 0x0;
+	for (;;)
+	{
+		if (uiAddress == 0x8'0000)
+		{
+			uiAddress = 0x0;
+		}
+		else
+		{
+			uiAddress = 0x8'0000;
+		}
+		cBoard.SetBus("Address", uiAddress);
+		szWriteCommand.Init();
+		cBoard.GenerateWrite(&szWriteCommand);
+		USend(&cUART, szWriteCommand.Text());
+		szWriteCommand.Kill();
+
+	}
+
+	szOutputCommand.Kill();
+	szPrevRead.Kill();
+
+	cUART.Close();
+	cUART.Kill();
+
+	cBoard.Kill();
+
+	return true;
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 //
 //
@@ -335,7 +424,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	{
 		gcLogger.Info2("--------------------- Loop [", SizeToString(uiLoop), "] ----------------------\n", NULL);
 
-		if (!TestBoard())
+		if (!TestBoardAddressDecode())
 		{
 			return 1;
 		}
