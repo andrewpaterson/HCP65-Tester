@@ -22,6 +22,9 @@
     <ClCompile Include="UART.cpp">
       <Filter>Source\UART</Filter>
     </ClCompile>
+    <ClCompile Include="AddressDecodeBoard.cpp">
+      <Filter>Source\Specific</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -32,6 +35,9 @@
     </Filter>
     <Filter Include="Source\Board">
       <UniqueIdentifier>{b17936bc-4e81-476e-8286-42922834f0dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Specific">
+      <UniqueIdentifier>{c04d4f2e-98b3-4b8b-9a59-258c040b8d88}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="UART.h">
       <Filter>Source\UART</Filter>
+    </ClInclude>
+    <ClInclude Include="AddressDecodeBoard.h">
+      <Filter>Source\Specific</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
