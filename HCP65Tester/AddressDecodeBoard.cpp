@@ -1,8 +1,4 @@
-#include "BaseLib/DebugOutput.h"
-#include "BaseLib/StringHelper.h"
-#include "BaseLib/LogString.h"
-#include "BoardPins.h"
-#include "UART.h"
+#include "AddressDecodeBoard.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -11,18 +7,15 @@
 //////////////////////////////////////////////////////////////////////////
 void SetupAddressDecode(CBoardPins* pcBoard)
 {
-	pcBoard->SetName("Address Decode");
-	pcBoard->SetVersion("V1");
+	SetupStandard56PinBoard(pcBoard, "Address Decode", "V1");
 
 	pcBoard->AddSignal(1, "Register11", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(2, "Register10", PD_Output, PS_Inverted);
-	pcBoard->AddPower(3, PP_5V);
 	pcBoard->AddSignal(4, "Register9", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(5, "Register8", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(6, "Register7", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(7, "Register6", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(8, "Register5", PD_Output, PS_Inverted);
-	pcBoard->AddPower(9, PP_Ground);
 	pcBoard->AddSignal(10, "Register4", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(11, "Register3", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(12, "Register2", PD_Output, PS_Inverted);
@@ -33,7 +26,6 @@ void SetupAddressDecode(CBoardPins* pcBoard)
 	pcBoard->AddSignal(17, "Device17", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(18, "Device16", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(19, "Device7", PD_Output, PS_Inverted);
-	pcBoard->AddPower(20, PP_Ground);
 	pcBoard->AddSignal(21, "Device6", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(22, "Device5", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(23, "Device4", PD_Output, PS_Inverted);
@@ -45,13 +37,11 @@ void SetupAddressDecode(CBoardPins* pcBoard)
 
 	pcBoard->AddSignal(29, "Devices", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(30, "RAM Swap", PD_Input, PS_Normal);
-	pcBoard->AddPower(31, PP_5V);
 	pcBoard->AddSignal(32, "RAM", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(33, "ROM", PD_Output, PS_Inverted);
 	pcBoard->AddNoCon(34);
 	pcBoard->AddSignal(35, "Kernal Mode", PD_Input, PS_Normal);
 	pcBoard->AddNoCon(36);
-	pcBoard->AddPower(37, PP_Ground);
 	pcBoard->AddSignal(38, "Main Memory", PD_Output, PS_Inverted);
 	pcBoard->AddSignal(39, "A23", PD_Input, PS_Normal);
 	pcBoard->AddSignal(40, "A22", PD_Input, PS_Normal);
@@ -62,7 +52,6 @@ void SetupAddressDecode(CBoardPins* pcBoard)
 	pcBoard->AddSignal(45, "A17", PD_Input, PS_Normal);
 	pcBoard->AddSignal(46, "A16", PD_Input, PS_Normal);
 	pcBoard->AddSignal(47, "A15", PD_Input, PS_Normal);
-	pcBoard->AddPower(48, PP_Ground);
 	pcBoard->AddSignal(49, "A3", PD_Input, PS_Normal);
 	pcBoard->AddSignal(50, "A2", PD_Input, PS_Normal);
 	pcBoard->AddSignal(51, "A1", PD_Input, PS_Normal);

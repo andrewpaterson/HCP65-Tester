@@ -154,7 +154,9 @@
   <ItemGroup>
     <ClCompile Include="AddressDecodeBoard.cpp" />
     <ClCompile Include="BoardPins.cpp" />
+    <ClCompile Include="CommonBoard.cpp" />
     <ClCompile Include="HCP65Tester.cpp" />
+    <ClCompile Include="TestBoard.cpp" />
     <ClCompile Include="TesterWindowData.cpp" />
     <ClCompile Include="TesterWindowDraw.cpp" />
     <ClCompile Include="TesterWindowTick.cpp" />
@@ -164,6 +166,8 @@
   <ItemGroup>
     <ClInclude Include="AddressDecodeBoard.h" />
     <ClInclude Include="BoardPins.h" />
+    <ClInclude Include="CommonBoard.h" />
+    <ClInclude Include="TestBoard.h" />
     <ClInclude Include="TesterWindowData.h" />
     <ClInclude Include="TesterWindowDraw.h" />
     <ClInclude Include="TesterWindowTick.h" />

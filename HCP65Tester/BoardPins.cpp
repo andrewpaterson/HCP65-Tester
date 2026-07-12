@@ -604,12 +604,33 @@ bool CBoardPins::IsGroundStyleD(void)
 		piG2 = (EPowerPin*)mmPinPowers.Get(16);
 		piG3 = (EPowerPin*)mmPinPowers.Get(21);
 	}
+	else if (miNumPins == 32)
+	{
+		piG0 = (EPowerPin*)mmPinPowers.Get(5);
+		piG1 = (EPowerPin*)mmPinPowers.Get(12);
+		piG2 = (EPowerPin*)mmPinPowers.Get(21);
+		piG3 = (EPowerPin*)mmPinPowers.Get(28);
+	}
+	else if (miNumPins == 40)
+	{
+		piG0 = (EPowerPin*)mmPinPowers.Get(7);
+		piG1 = (EPowerPin*)mmPinPowers.Get(14);
+		piG2 = (EPowerPin*)mmPinPowers.Get(27);
+		piG3 = (EPowerPin*)mmPinPowers.Get(34);
+	}
 	else if (miNumPins == 56)
 	{
 		piG0 = (EPowerPin*)mmPinPowers.Get(9);
 		piG1 = (EPowerPin*)mmPinPowers.Get(20);
 		piG2 = (EPowerPin*)mmPinPowers.Get(37);
 		piG3 = (EPowerPin*)mmPinPowers.Get(48);
+	}	
+	else if (miNumPins == 64)
+	{
+		piG0 = (EPowerPin*)mmPinPowers.Get(10);
+		piG1 = (EPowerPin*)mmPinPowers.Get(23);
+		piG2 = (EPowerPin*)mmPinPowers.Get(42);
+		piG3 = (EPowerPin*)mmPinPowers.Get(55);
 	}
 
 	bG0 = piG0 && ((*piG0) == PP_Ground);
@@ -638,11 +659,23 @@ bool CBoardPins::IsGroundStyleC(void)
 
 	if (miNumPins == 24)
 	{
-		piG = (EPowerPin*)mmPinPowers.Get(13);
+		piG = (EPowerPin*)mmPinPowers.Get(24);
+	}
+	else if (miNumPins == 32)
+	{
+		piG = (EPowerPin*)mmPinPowers.Get(32);
+	}
+	else if (miNumPins == 40)
+	{
+		piG = (EPowerPin*)mmPinPowers.Get(40);
 	}
 	else if (miNumPins == 56)
 	{
 		piG = (EPowerPin*)mmPinPowers.Get(56);
+	}
+	else if (miNumPins == 64)
+	{
+		piG = (EPowerPin*)mmPinPowers.Get(64);
 	}
 
 	bG = piG && ((*piG) == PP_Ground);
@@ -672,10 +705,25 @@ bool CBoardPins::Is5VStyleC(void)
 		pi50 = (EPowerPin*)mmPinPowers.Get(1);
 		pi51 = (EPowerPin*)mmPinPowers.Get(23);
 	}
+	else if (miNumPins == 32)
+	{
+		pi50 = (EPowerPin*)mmPinPowers.Get(1);
+		pi51 = (EPowerPin*)mmPinPowers.Get(17);
+	}
+	else if (miNumPins == 40)
+	{
+		pi50 = (EPowerPin*)mmPinPowers.Get(3);
+		pi51 = (EPowerPin*)mmPinPowers.Get(23);
+	}
 	else if (miNumPins == 56)
 	{
 		pi50 = (EPowerPin*)mmPinPowers.Get(3);
 		pi51 = (EPowerPin*)mmPinPowers.Get(31);
+	}
+	else if (miNumPins == 64)
+	{
+		pi50 = (EPowerPin*)mmPinPowers.Get(3);
+		pi51 = (EPowerPin*)mmPinPowers.Get(35);
 	}
 
 	b50 = pi50 && ((*pi50) == PP_5V);
@@ -701,12 +749,24 @@ bool CBoardPins::Is5VStyleB(void)
 
 	if (miNumPins == 24)
 	{
-		pi5 = (EPowerPin*)mmPinPowers.Get(8);
+		pi5 = (EPowerPin*)mmPinPowers.Get(12);
 
+	}
+	else if (miNumPins == 32)
+	{
+		pi5 = (EPowerPin*)mmPinPowers.Get(16);
+	}
+	else if (miNumPins == 40)
+	{
+		pi5 = (EPowerPin*)mmPinPowers.Get(20);
 	}
 	else if (miNumPins == 56)
 	{
 		pi5 = (EPowerPin*)mmPinPowers.Get(28);
+	}
+	else if (miNumPins == 64)
+	{
+		pi5 = (EPowerPin*)mmPinPowers.Get(32);
 	}
 
 	b5 = pi5 && ((*pi5) == PP_5V);

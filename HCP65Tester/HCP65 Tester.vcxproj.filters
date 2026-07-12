@@ -25,6 +25,12 @@
     <ClCompile Include="AddressDecodeBoard.cpp">
       <Filter>Source\Specific</Filter>
     </ClCompile>
+    <ClCompile Include="TestBoard.cpp">
+      <Filter>Source\Specific</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonBoard.cpp">
+      <Filter>Source\Specific</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -60,6 +66,12 @@
       <Filter>Source\UART</Filter>
     </ClInclude>
     <ClInclude Include="AddressDecodeBoard.h">
+      <Filter>Source\Specific</Filter>
+    </ClInclude>
+    <ClInclude Include="TestBoard.h">
+      <Filter>Source\Specific</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonBoard.h">
       <Filter>Source\Specific</Filter>
     </ClInclude>
   </ItemGroup>

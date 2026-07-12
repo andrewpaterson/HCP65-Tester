@@ -20,6 +20,12 @@
 
 
 
+#define USend(u, c) 	if (!(u)->Send(c)) \
+{ \
+	return false; \
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 //
 //
@@ -28,17 +34,10 @@ void SetupDebugBoard(CBoardPins* pcBoard, size uiNumPins)
 {
 	size		i;
 
-	uiNumPins = 64;
 	for (i = 1; i <= uiNumPins; i++)
 	{
 		pcBoard->AddSignal(i, SizeToString(i), PD_Input, PS_Normal);
 	}
-}
-
-
-#define USend(u, c) 	if (!(u)->Send(c)) \
-{ \
-	return false; \
 }
 
 

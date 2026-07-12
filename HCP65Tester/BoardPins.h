@@ -11,6 +11,7 @@ enum EPinDirection
 	PD_Unknown,
 	PD_Input,
 	PD_Output,
+	//PD_Tristate,
 };
 
 
