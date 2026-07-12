@@ -118,7 +118,7 @@ void SetupDebugBoard(CBoardPins* pcBoard, size uiNumPins)
 
 #define USend(u, c) 	if (!(u)->Send(c)) \
 { \
-	return 1; \
+	return false; \
 }
 
 
@@ -126,7 +126,7 @@ void SetupDebugBoard(CBoardPins* pcBoard, size uiNumPins)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-int TestDebugBoard(CBoardPins* pcBoard, CUART* pcUART)
+bool TestDebugBoard(CBoardPins* pcBoard, CUART* pcUART)
 {
 	CChars	szWriteCommand;
 	size	uiNumNybbles;
@@ -172,22 +172,66 @@ int TestDebugBoard(CBoardPins* pcBoard, CUART* pcUART)
 		szResponse.DumpKill();
 	}
 
-	return 0;
+	return true;
 }
 
-bool TestBoardAddressDecode(void)
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool SetupCommands(CBoardPins* pcBoard, CUART* pcUART)
 {
-	CBoardPins	cBoard;
 	CChars		szOutputCommand;
 	CChars		szWriteCommand;
 	CChars		szPowerCommand;
 	CChars		szReadCommand;
+
+	szPowerCommand.Init();
+	pcBoard->GeneratePower(&szPowerCommand);
+	USend(pcUART, szPowerCommand.Text());
+	szPowerCommand.Dump();
+	EngineOutput("\n");
+	szPowerCommand.Kill();
+
+	szReadCommand.Init();
+	pcBoard->GenerateRead(&szReadCommand);
+	USend(pcUART, szReadCommand.Text());
+	szReadCommand.Dump();
+	EngineOutput("\n");
+	szReadCommand.Kill();
+
+	szOutputCommand.Init();
+	pcBoard->GenerateOutput(&szOutputCommand);
+	USend(pcUART, szOutputCommand.Text());
+	szOutputCommand.Dump();
+	EngineOutput("\n");
+	USend(pcUART, "W");
+	USend(pcUART, szOutputCommand.Text());
+
+	szWriteCommand.Init();
+	pcBoard->GenerateWrite(&szWriteCommand);
+	USend(pcUART, szWriteCommand.Text());
+	szWriteCommand.Dump();
+	EngineOutput("\n");
+	szWriteCommand.Kill();
+
+	szOutputCommand.Kill();
+
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool TestBoardAddressShit(void)
+{
+	CBoardPins	cBoard;
 	CChars		szReadResult;
 	CUART		cUART;
 	CChars		szPrevRead;
-	CChars		szRead;
-	size		uiFlags;
-	bool		bSuccess;
 
 	cBoard.Init();
 	SetupAddressDecode(&cBoard);
@@ -200,38 +244,112 @@ bool TestBoardAddressDecode(void)
 
 	USend(&cUART, "POW");
 	USend(&cUART, "PGb15a1");
-
-	szPowerCommand.Init();
-	cBoard.GeneratePower(&szPowerCommand);
-	USend(&cUART, szPowerCommand.Text());
-	szPowerCommand.Dump();
-	EngineOutput("\n");
-	szPowerCommand.Kill();
-
-	szReadCommand.Init();
-	cBoard.GenerateRead(&szReadCommand);
-	USend(&cUART, szReadCommand.Text());
-	szReadCommand.Dump();
-	EngineOutput("\n");
-	szReadCommand.Kill();
-
-	szOutputCommand.Init();
-	cBoard.GenerateOutput(&szOutputCommand);
-	USend(&cUART, szOutputCommand.Text());
-	szOutputCommand.Dump();
-	EngineOutput("\n");
-	USend(&cUART, "W");
-	USend(&cUART, szOutputCommand.Text());
-
-	szWriteCommand.Init();
-	cBoard.GenerateWrite(&szWriteCommand);
-	USend(&cUART, szWriteCommand.Text());
-	szWriteCommand.Dump();
-	EngineOutput("\n");
-	szWriteCommand.Kill();
-
+	USend(&cUART, "OFFFFFFFFFFFFFF");
+	USend(&cUART, "R0_6");
 	EngineOutput("\n");
 
+	for (;;)
+	{
+		if (!cUART.Send("W"))
+		{
+			return false;
+		}
+		szReadResult.Init();
+		if (!cUART.Send("RR", &szReadResult))
+		{
+			return false;
+		}
+		szReadResult.Dump();
+		szReadResult.Kill();
+		szReadResult.Init();
+		if (!cUART.Send("RR", &szReadResult))
+		{
+			return false;
+		}
+		szReadResult.Dump();
+		szReadResult.Kill();
+		szReadResult.Init();
+		if (!cUART.Send("RR", &szReadResult))
+		{
+			return false;
+		}
+		szReadResult.Dump();
+		szReadResult.Kill();
+		if (!cUART.Send("WFFFFFFFFFFFFFF"))
+		{
+			return false;
+		}
+		szReadResult.Init();
+		if (!cUART.Send("RR", &szReadResult))
+		{
+			return false;
+		}
+		szReadResult.Dump();
+		szReadResult.Kill();
+		szReadResult.Init();
+		if (!cUART.Send("RR", &szReadResult))
+		{
+			return false;
+		}
+		szReadResult.Dump();
+		szReadResult.Kill();
+		szReadResult.Init();
+		if (!cUART.Send("RR", &szReadResult))
+		{
+			return false;
+		}
+		szReadResult.Dump();
+		szReadResult.Kill();
+	}
+
+	szPrevRead.Kill();
+
+	cUART.Close();
+	cUART.Kill();
+
+	cBoard.Kill();
+
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool TestBoardAddressDecode(void)
+{
+	CBoardPins	cBoard;
+	CChars		szReadResult;
+	CUART		cUART;
+	CChars		szPrevRead;
+	size		uiFlags;
+	bool		bSuccess;
+	CChars		szRead;
+	CChars		szWriteCommand;
+	size		uiTick;
+
+	cBoard.Init();
+	SetupAddressDecode(&cBoard);
+
+	cUART.Init("COM3");
+	if (!cUART.Open())
+	{
+		return false;
+	}
+
+	USend(&cUART, "POW");
+	USend(&cUART, "PGa1Gb15a1");
+
+	if (!SetupCommands(&cBoard, &cUART))
+	{
+		return false;
+	}
+
+	EngineOutput("\n");
+
+	bSuccess = true;
+	uiTick = 0;
 	szPrevRead.Init();
 	size uiAddress;
 	for (uiFlags = 0; uiFlags < 8; uiFlags++)
@@ -293,6 +411,7 @@ bool TestBoardAddressDecode(void)
 			{
 				break;
 			}
+			uiTick++;
 		}
 		if (!bSuccess)
 		{
@@ -300,27 +419,51 @@ bool TestBoardAddressDecode(void)
 		}
 	}
 
-	szOutputCommand.Kill();
 	szPrevRead.Kill();
 
+	EngineOutput(SizeToString(uiTick));
+	EngineOutput(" ");
+	EngineOutput(BoolToString(bSuccess));
+	EngineOutput("\n");
+
+	USend(&cUART, "POW");
 	cUART.Close();
 	cUART.Kill();
 
 	cBoard.Kill();
 
-	return true;
+	return bSuccess;
 }
 
 
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool TestBoardLoopAddressDecode(void)
+{
+	bool		bSuccess;
+
+	bSuccess = true;
+	while (bSuccess)
+	{
+		bSuccess = TestBoardAddressDecode();
+	}
+
+	return bSuccess;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
 bool TestBoardRAMROM(void)
 {
 	CBoardPins	cBoard;
-	CChars		szOutputCommand;
-	CChars		szWriteCommand;
-	CChars		szPowerCommand;
-	CChars		szReadCommand;
 	CUART		cUART;
 	CChars		szPrevRead;
+	CChars		szWriteCommand;
 
 	cBoard.Init();
 	SetupAddressDecode(&cBoard);
@@ -334,34 +477,10 @@ bool TestBoardRAMROM(void)
 	USend(&cUART, "POW");
 	USend(&cUART, "PGb15a1");
 
-	szPowerCommand.Init();
-	cBoard.GeneratePower(&szPowerCommand);
-	USend(&cUART, szPowerCommand.Text());
-	szPowerCommand.Dump();
-	EngineOutput("\n");
-	szPowerCommand.Kill();
-
-	szReadCommand.Init();
-	cBoard.GenerateRead(&szReadCommand);
-	USend(&cUART, szReadCommand.Text());
-	szReadCommand.Dump();
-	EngineOutput("\n");
-	szReadCommand.Kill();
-
-	szOutputCommand.Init();
-	cBoard.GenerateOutput(&szOutputCommand);
-	USend(&cUART, szOutputCommand.Text());
-	szOutputCommand.Dump();
-	EngineOutput("\n");
-	USend(&cUART, "W");
-	USend(&cUART, szOutputCommand.Text());
-
-	szWriteCommand.Init();
-	cBoard.GenerateWrite(&szWriteCommand);
-	USend(&cUART, szWriteCommand.Text());
-	szWriteCommand.Dump();
-	EngineOutput("\n");
-	szWriteCommand.Kill();
+	if (!SetupCommands(&cBoard, &cUART))
+	{
+		return false;
+	}
 
 	EngineOutput("\n");
 
@@ -390,7 +509,6 @@ bool TestBoardRAMROM(void)
 
 	}
 
-	szOutputCommand.Kill();
 	szPrevRead.Kill();
 
 	cUART.Close();
@@ -418,41 +536,33 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	DataIOInit();
 	ObjectsInit();
 
-	size		uiLoop;
+	bool bResult;
 
-	for (uiLoop = 0;; uiLoop++)
-	{
-		gcLogger.Info2("--------------------- Loop [", SizeToString(uiLoop), "] ----------------------\n", NULL);
+	bResult = TestBoardLoopAddressDecode();
 
-		if (!TestBoardAddressDecode())
-		{
-			return 1;
-		}
-	}
+	//{
+	//	CWinGDIWindowFactory	cNativeFactory;
+	//	CWindow					cTesterWindow;
+	//	CTesterWindowDraw		cDraw;
+	//	CTesterWindowTick		cTick;
+	//	STesterWindowData		sData;
 
-	{
-		CWinGDIWindowFactory	cNativeFactory;
-		CWindow					cTesterWindow;
-		CTesterWindowDraw		cDraw;
-		CTesterWindowTick		cTick;
-		STesterWindowData		sData;
+	//	cNativeFactory.Init(&gcMemoryAllocator,
+	//		hInstance,
+	//		hPrevInstance,
+	//		nCmdShow,
+	//		"HCP65Tester");
 
-		cNativeFactory.Init(&gcMemoryAllocator,
-			hInstance,
-			hPrevInstance,
-			nCmdShow,
-			"HCP65Tester");
+	//	cDraw.Init(&sData);
+	//	cTick.Init(&sData);
+	//	cTesterWindow.Init("HCP65 Board Tester", &cNativeFactory, &cTick, &cDraw);
 
-		cDraw.Init(&sData);
-		cTick.Init(&sData);
-		cTesterWindow.Init("HCP65 Board Tester", &cNativeFactory, &cTick, &cDraw);
+	//	cTesterWindow.Show();
 
-		cTesterWindow.Show();
+	//	cTesterWindow.Kill();
 
-		cTesterWindow.Kill();
-
-		cNativeFactory.Kill();
-	}
+	//	cNativeFactory.Kill();
+	//}
 
 
 	ObjectsKill();
@@ -465,6 +575,14 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	gcLogger.Kill();
 
 	_CrtDumpMemoryLeaks();
-	return 0;
+
+	if (bResult)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
 }
 

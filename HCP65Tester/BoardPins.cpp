@@ -527,16 +527,13 @@ void CBoardPins::UpdateRead(CChars* pszReadResult)
 {
 	size		iCount;
 	size		uiHalfPins;
-	size		ui;
+	size		i;
+	size		j;
 	char		c;
 	size		uiNybble;
 	size		uiLength;
-	size		uj;
 	size		uiMask;
 	size		iPinNumber;
-	bool		bOutput;
-	bool		bNoConnect;
-	bool		bPower;
 	bool		bBit;
 
 	uiHalfPins = miNumPins / 2;
@@ -544,9 +541,9 @@ void CBoardPins::UpdateRead(CChars* pszReadResult)
 
 	msReadValues.Zero();
 	uiLength = pszReadResult->Length() - 3;  //R, \r and \n
-	for (ui = 0; ui < uiLength; ui++)
+	for (i = 0; i < uiLength; i++)
 	{
-		c = pszReadResult->GetChar(ui + 1);
+		c = pszReadResult->GetChar(i + 1);
 		c = ToLower(c);
 		uiNybble = GetCharHex(c);
 		if (uiNybble == SIZE_MAX)
@@ -554,7 +551,7 @@ void CBoardPins::UpdateRead(CChars* pszReadResult)
 			return;
 		}
 
-		for (uj = 0; uj < 4; uj++)
+		for (j = 0; j < 4; j++)
 		{
 			if (iCount > uiHalfPins)
 			{
@@ -565,11 +562,7 @@ void CBoardPins::UpdateRead(CChars* pszReadResult)
 				iPinNumber = iCount;
 			}
 
-			bOutput = !msOutputs.Get(iPinNumber - 1);
-			bPower = mmPinPowers.HasKey(iPinNumber);
-			bNoConnect = mmPinNoConnects.HasKey(iPinNumber);
-			mmPinNoConnects.Get(iPinNumber);
-			uiMask = 1 << (3 - uj);
+			uiMask = 1 << (3 - j);
 			bBit = uiNybble & uiMask;
 			msReadValues.Set(iPinNumber - 1, bBit);
 
