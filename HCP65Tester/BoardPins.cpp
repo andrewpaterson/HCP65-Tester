@@ -497,24 +497,36 @@ void CBoardPins::GenerateWrite(CChars* psz)
 //////////////////////////////////////////////////////////////////////////
 void CBoardPins::GeneratePower(CChars* psz)
 {
+	bool	bAny;
+
+	bAny = false;
 	psz->Append("P");
 
 	if (IsGroundStyleD())
 	{
 		psz->Append("Gd1");
+		bAny = true;
 	}
 	if (IsGroundStyleC())
 	{
 		psz->Append("Gc1");
+		bAny = true;
 	}
 
 	if (Is5VStyleC())
 	{
 		psz->Append("5c1");
+		bAny = true;
 	}
 	if (Is5VStyleB())
 	{
 		psz->Append("5b1");
+		bAny = true;
+	}
+
+	if (!bAny)
+	{
+		psz->RemoveFromEnd(1);
 	}
 }
 

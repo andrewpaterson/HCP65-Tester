@@ -17,81 +17,12 @@
 #include "BoardPins.h"
 #include "UART.h"
 #include "AddressDecodeBoard.h"
-
+#include "TestBoard.h"
 
 
 #define USend(u, c) 	if (!(u)->Send(c)) \
 { \
 	return false; \
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-//
-//////////////////////////////////////////////////////////////////////////
-void SetupDebugBoard(CBoardPins* pcBoard, size uiNumPins)
-{
-	size		i;
-
-	for (i = 1; i <= uiNumPins; i++)
-	{
-		pcBoard->AddSignal(i, SizeToString(i), PD_Input, PS_Normal);
-	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-//
-//////////////////////////////////////////////////////////////////////////
-bool TestDebugBoard(CBoardPins* pcBoard, CUART* pcUART)
-{
-	CChars	szWriteCommand;
-	size	uiNumNybbles;
-	CChars	szResponse;
-	size	i;
-
-	uiNumNybbles = pcBoard->NumPins() / 4;
-	for (i = 0; i < uiNumNybbles; i++)
-	{
-		if (i % 4 == 0)
-		{
-			EngineOutput("-----------------\n");
-		}
-
-		szWriteCommand.Init("W");
-		szWriteCommand.Append('0', i);
-		szWriteCommand.Append(ToUpper(IntToString(i % 16, 16)));
-		szWriteCommand.Append('0', uiNumNybbles - i - 1);
-		USend(pcUART, szWriteCommand.Text());
-		szWriteCommand.Kill();
-
-		szResponse.Init();
-		pcUART->Send("R0_7", &szResponse);
-		szResponse.DumpKill();
-	}
-
-	for (i = 0; i < uiNumNybbles; i++)
-	{
-		if (i % 4 == 0)
-		{
-			EngineOutput("-----------------\n");
-		}
-
-		szWriteCommand.Init("W");
-		szWriteCommand.Append('F', i);
-		szWriteCommand.Append(ToUpper(IntToString(i % 16, 16)));
-		szWriteCommand.Append('F', uiNumNybbles - i - 1);
-		USend(pcUART, szWriteCommand.Text());
-		szWriteCommand.Kill();
-
-		szResponse.Init();
-		pcUART->Send("R0_7", &szResponse);
-		szResponse.DumpKill();
-	}
-
-	return true;
 }
 
 
@@ -108,34 +39,35 @@ bool SetupCommands(CBoardPins* pcBoard, CUART* pcUART)
 
 	szPowerCommand.Init();
 	pcBoard->GeneratePower(&szPowerCommand);
-	USend(pcUART, szPowerCommand.Text());
-	szPowerCommand.Dump();
-	EngineOutput("\n");
+	if (!szPowerCommand.Empty())
+	{
+		szPowerCommand.Dump();
+		USend(pcUART, szPowerCommand.Text());
+		EngineOutput("\n");
+	}
 	szPowerCommand.Kill();
 
 	szReadCommand.Init();
 	pcBoard->GenerateRead(&szReadCommand);
-	USend(pcUART, szReadCommand.Text());
 	szReadCommand.Dump();
+	USend(pcUART, szReadCommand.Text());
 	EngineOutput("\n");
 	szReadCommand.Kill();
 
 	szOutputCommand.Init();
 	pcBoard->GenerateOutput(&szOutputCommand);
-	USend(pcUART, szOutputCommand.Text());
 	szOutputCommand.Dump();
-	EngineOutput("\n");
-	USend(pcUART, "W");
 	USend(pcUART, szOutputCommand.Text());
+	EngineOutput("\n");
+	USend(pcUART, szOutputCommand.Text());
+	szOutputCommand.Kill();
 
 	szWriteCommand.Init();
 	pcBoard->GenerateWrite(&szWriteCommand);
-	USend(pcUART, szWriteCommand.Text());
 	szWriteCommand.Dump();
+	USend(pcUART, szWriteCommand.Text());
 	EngineOutput("\n");
 	szWriteCommand.Kill();
-
-	szOutputCommand.Kill();
 
 	return true;
 }
@@ -252,7 +184,8 @@ bool TestBoardLoop(char* szComPort)
 	USend(&cUART, "PGa1Gb15a1");
 
 	cBoard.Init();
-	SetupAddressDecode(&cBoard);
+	//SetupAddressDecode(&cBoard);
+	SetupTestBoard(&cBoard, 56);
 
 	if (!SetupCommands(&cBoard, &cUART))
 	{
@@ -264,7 +197,7 @@ bool TestBoardLoop(char* szComPort)
 	bSuccess = true;
 	while (bSuccess)
 	{
-		bSuccess = TestAddressDecode(&cUART, &cBoard);
+		bSuccess = TestTestBoard(&cUART, &cBoard);
 	}
 
 	USend(&cUART, "POW");
