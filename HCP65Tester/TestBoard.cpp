@@ -68,11 +68,15 @@ bool TestTestBoard(CUART* pcUART, CBoardPins* pcBoard, size uiStep, size uiOffse
 	CChars	szResult;
 	CChars	szWriteCommand;
 	bool	bResult;
+	uint32	uiValueRead1;
+	uint32	uiValueRead2;
+	uint32	uiValueWrite;
 
 	GenerateTestWrite(pcBoard, uiStep, uiOffset);
 
 	szWriteCommand.Init();
 	pcBoard->GenerateWrite(&szWriteCommand);
+	uiValueWrite = pcBoard->GetBusWrite("Board");
 	szResult.Init();
 	bResult = pcUART->Send(szWriteCommand.Text(), &szResult);
 	szWriteCommand.Kill();
@@ -91,7 +95,18 @@ bool TestTestBoard(CUART* pcUART, CBoardPins* pcBoard, size uiStep, size uiOffse
 		return false;
 	}
 	pcBoard->UpdateRead(&szResult);
-	pcBoard->GetBus("Board");
+	uiValueRead1 = pcBoard->GetBus("Board");
+	szResult.Kill();
+
+	szResult.Init();
+	bResult = pcUART->Send("RR", &szResult);
+	if (!bResult)
+	{
+		szResult.Kill();
+		return false;
+	}
+	pcBoard->UpdateRead(&szResult);
+	uiValueRead2 = pcBoard->GetBus("Board");
 	szResult.Kill();
 	return true;
 }

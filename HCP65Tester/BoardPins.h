@@ -109,8 +109,14 @@ public:
 	bool	Is5VStyleB(void);
 
 	char*	GetPin(size iPinNumber);
-
+	
 	size	NumPins(void);
+
+	bool	Get(char* szPinName);
+	bool	Get(size iPinNumber);
+	uint32	GetBus(char* szBusName);
+	bool	GetWrite(size iPinNumber);
+	uint32	GetBusWrite(char* szBusName);
 
 	bool	PrintRead(CChars* psz, bool bOnlyActive);
 	void	PrintWrite(CChars* psz, bool bOnlyActive);

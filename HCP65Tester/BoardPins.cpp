@@ -320,7 +320,7 @@ bool CBoardPins::SetBus(char* szBusName, uint32 uiBusValues)
 	pcBus = mmBusses.Get(szBusName);
 	if (!pcBus)
 	{
-		gcLogger.Error2(__METHOD__, " Cannot find a Bus named [", szBusName, "].");
+		return gcLogger.Error2(__METHOD__, " Cannot find a Bus named [", szBusName, "].");
 	}
 
 	bHasNext = pcBus->StartIteration(&sIter, &iPinNumber, &iBusOffset);
@@ -797,6 +797,130 @@ bool CBoardPins::Is5VStyleB(void)
 size CBoardPins::NumPins(void)
 {
 	return miNumPins;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::Get(char* szPinName)
+{
+	size	iPinNumber;
+	bool	bValue;
+
+	iPinNumber = (size)mmPinNames.Get(szPinName, 0);
+	if (iPinNumber == 0)
+	{
+		return gcLogger.Error2(__METHOD__, " Cannot find a Pin named [", szPinName, "].");
+	}
+
+	bValue = msReadValues.Get(iPinNumber - 1);
+	return bValue;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::Get(size iPinNumber)
+{
+	bool	bValue;
+
+	bValue = msReadValues.Get(iPinNumber - 1);
+	return bValue;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CBoardPins::GetWrite(size iPinNumber)
+{
+	bool	bValue;
+
+	bValue = msWriteValues.Get(iPinNumber - 1);
+	return bValue;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+uint32 CBoardPins::GetBus(char* szBusName)
+{
+	int				iPinNumber;
+	int				iBusOffset;
+	CBusPins*		pcBus;
+	SMapIterator	sIter;
+	bool			bHasNext;
+	uint32			uiMask;
+	bool			bValue;
+	uint32			uiBusValues;
+
+	pcBus = mmBusses.Get(szBusName);
+	if (pcBus == NULL)
+	{
+		gcLogger.Error2(__METHOD__, " Cannot find a Bus named [", szBusName, "].");
+		return 0;
+	}
+
+	uiBusValues = 0;
+	bHasNext = pcBus->StartIteration(&sIter, &iPinNumber, &iBusOffset);
+	while (bHasNext)
+	{
+		bValue = Get(iPinNumber);
+		if (bValue)
+		{
+			uiMask = 1 << iBusOffset;
+			uiBusValues = uiMask | uiBusValues;
+		}
+		bHasNext = pcBus->Iterate(&sIter, &iPinNumber, &iBusOffset);
+	}
+
+	return uiBusValues;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+uint32 CBoardPins::GetBusWrite(char* szBusName)
+{
+	int				iPinNumber;
+	int				iBusOffset;
+	CBusPins*		pcBus;
+	SMapIterator	sIter;
+	bool			bHasNext;
+	uint32			uiMask;
+	bool			bValue;
+	uint32			uiBusValues;
+
+	pcBus = mmBusses.Get(szBusName);
+	if (pcBus == NULL)
+	{
+		gcLogger.Error2(__METHOD__, " Cannot find a Bus named [", szBusName, "].");
+		return 0;
+	}
+
+	uiBusValues = 0;
+	bHasNext = pcBus->StartIteration(&sIter, &iPinNumber, &iBusOffset);
+	while (bHasNext)
+	{
+		bValue = GetWrite(iPinNumber);
+		if (bValue)
+		{
+			uiMask = 1 << iBusOffset;
+			uiBusValues = uiMask | uiBusValues;
+		}
+		bHasNext = pcBus->Iterate(&sIter, &iPinNumber, &iBusOffset);
+	}
+
+	return uiBusValues;
 }
 
 
