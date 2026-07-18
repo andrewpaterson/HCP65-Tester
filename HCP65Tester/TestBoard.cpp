@@ -35,7 +35,7 @@ void SetupTestBoard(CBoardPins* pcBoard, size uiNumPins)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-void GenerateTestWrite(CBoardPins* pcBoard, size uiStep, size uiOffset)
+void GenerateBoardTestWrite(CBoardPins* pcBoard, size uiStep, size uiOffset)
 {
 	size	uiNumPins;
 	size	i;
@@ -72,13 +72,14 @@ bool TestTestBoard(CUART* pcUART, CBoardPins* pcBoard, size uiStep, size uiOffse
 	uint32	uiValueRead2;
 	uint32	uiValueWrite;
 
-	GenerateTestWrite(pcBoard, uiStep, uiOffset);
+	GenerateBoardTestWrite(pcBoard, uiStep, uiOffset);
 
 	szWriteCommand.Init();
 	pcBoard->GenerateWrite(&szWriteCommand);
 	uiValueWrite = pcBoard->GetBusWrite("Board");
 	szResult.Init();
 	bResult = pcUART->Send(szWriteCommand.Text(), &szResult);
+	szWriteCommand.AppendNewLine();
 	szWriteCommand.Kill();
 	if (!bResult)
 	{
@@ -130,7 +131,7 @@ bool TestTestBoard(CUART* pcUART, CBoardPins* pcBoard, size uiStep)
 		}
 	}
 
-	for (i = uiStep - 1; i >= 0; i--)
+	for (i = uiStep - 1; i > 0; i--)
 	{
 		bResult = TestTestBoard(pcUART, pcBoard, uiStep, i);
 		if (!bResult)
@@ -148,9 +149,9 @@ bool TestTestBoard(CUART* pcUART, CBoardPins* pcBoard, size uiStep)
 //////////////////////////////////////////////////////////////////////////
 bool TestTestBoard(CUART* pcUART, CBoardPins* pcBoard)
 {
-	TestTestBoard(pcUART, pcBoard, 1);
-	TestTestBoard(pcUART, pcBoard, 2);
-	TestTestBoard(pcUART, pcBoard, 4);
+	//TestTestBoard(pcUART, pcBoard, 1);
+	//TestTestBoard(pcUART, pcBoard, 2);
+	//TestTestBoard(pcUART, pcBoard, 4);
 	TestTestBoard(pcUART, pcBoard, 8);
 	return true;
 }

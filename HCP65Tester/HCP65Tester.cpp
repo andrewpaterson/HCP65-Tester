@@ -77,98 +77,7 @@ bool SetupCommands(CBoardPins* pcBoard, CUART* pcUART)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-bool TestBoardAddressShit(void)
-{
-	CBoardPins	cBoard;
-	CChars		szReadResult;
-	CUART		cUART;
-	CChars		szPrevRead;
-
-	cBoard.Init();
-	SetupAddressDecode(&cBoard);
-
-	cUART.Init("COM3");
-	if (!cUART.Open())
-	{
-		return false;
-	}
-
-	USend(&cUART, "POW");
-	USend(&cUART, "PGb15a1");
-	USend(&cUART, "OFFFFFFFFFFFFFF");
-	USend(&cUART, "R0_6");
-	EngineOutput("\n");
-
-	for (;;)
-	{
-		if (!cUART.Send("W"))
-		{
-			return false;
-		}
-		szReadResult.Init();
-		if (!cUART.Send("RR", &szReadResult))
-		{
-			return false;
-		}
-		szReadResult.Dump();
-		szReadResult.Kill();
-		szReadResult.Init();
-		if (!cUART.Send("RR", &szReadResult))
-		{
-			return false;
-		}
-		szReadResult.Dump();
-		szReadResult.Kill();
-		szReadResult.Init();
-		if (!cUART.Send("RR", &szReadResult))
-		{
-			return false;
-		}
-		szReadResult.Dump();
-		szReadResult.Kill();
-		if (!cUART.Send("WFFFFFFFFFFFFFF"))
-		{
-			return false;
-		}
-		szReadResult.Init();
-		if (!cUART.Send("RR", &szReadResult))
-		{
-			return false;
-		}
-		szReadResult.Dump();
-		szReadResult.Kill();
-		szReadResult.Init();
-		if (!cUART.Send("RR", &szReadResult))
-		{
-			return false;
-		}
-		szReadResult.Dump();
-		szReadResult.Kill();
-		szReadResult.Init();
-		if (!cUART.Send("RR", &szReadResult))
-		{
-			return false;
-		}
-		szReadResult.Dump();
-		szReadResult.Kill();
-	}
-
-	szPrevRead.Kill();
-
-	cUART.Close();
-	cUART.Kill();
-
-	cBoard.Kill();
-
-	return true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-//
-//////////////////////////////////////////////////////////////////////////
-bool TestBoardLoop(char* szComPort)
+bool TestBoardLoop(char* szComPort, size uiBoardPins)
 {
 	bool		bSuccess;
 	CBoardPins  cBoard;
@@ -185,7 +94,7 @@ bool TestBoardLoop(char* szComPort)
 
 	cBoard.Init();
 	//SetupAddressDecode(&cBoard);
-	SetupTestBoard(&cBoard, 56);
+	SetupTestBoard(&cBoard, uiBoardPins);
 
 	if (!SetupCommands(&cBoard, &cUART))
 	{
@@ -228,7 +137,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	bool bResult;
 
-	bResult = TestBoardLoop("COM3");
+	bResult = TestBoardLoop("COM3", 64);
 
 	//{
 	//	CWinGDIWindowFactory	cNativeFactory;

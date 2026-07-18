@@ -158,35 +158,6 @@ void CloseWindowsCOMPort(HANDLE hSerial)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-bool WindowsCOM(void)
-{
-    HANDLE          hSerial;
-
-    hSerial = OpenWindowsCOMPort("COM4");
-    if (hSerial == INVALID_HANDLE_VALUE)
-    {
-        return false;
-    }
-
-    SendToWindowsCOMPort(hSerial, "P\n");
-    SendToWindowsCOMPort(hSerial, "O\n");
-    SendToWindowsCOMPort(hSerial, "W\n");
-    SendToWindowsCOMPort(hSerial, "PGb1\n");
-    SendToWindowsCOMPort(hSerial, "P5a1\n");
-    SendToWindowsCOMPort(hSerial, "PGd1\n");
-    SendToWindowsCOMPort(hSerial, "P5c1\n");
-    SendToWindowsCOMPort(hSerial, "O67BFFF02080114\n");
-
-    CloseWindowsCOMPort(hSerial);
-
-    return true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-//
-//////////////////////////////////////////////////////////////////////////
 bool IsWindowsCOMPortSuccess(HANDLE hSerial)
 {
     return hSerial != INVALID_HANDLE_VALUE;
