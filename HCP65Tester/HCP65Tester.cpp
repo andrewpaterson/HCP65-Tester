@@ -137,31 +137,32 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	bool bResult;
 
-	bResult = TestBoardLoop("COM3", 64);
+	bResult = true;
+	//bResult = TestBoardLoop("COM3", 64);
 
-	//{
-	//	CWinGDIWindowFactory	cNativeFactory;
-	//	CWindow					cTesterWindow;
-	//	CTesterWindowDraw		cDraw;
-	//	CTesterWindowTick		cTick;
-	//	STesterWindowData		sData;
+	{
+		CWinGDIWindowFactory	cNativeFactory;
+		CWindow					cTesterWindow;
+		CTesterWindowDraw		cDraw;
+		CTesterWindowTick		cTick;
+		STesterWindowData		sData;
 
-	//	cNativeFactory.Init(&gcMemoryAllocator,
-	//		hInstance,
-	//		hPrevInstance,
-	//		nCmdShow,
-	//		"HCP65Tester");
+		cNativeFactory.Init(&gcMemoryAllocator,
+			hInstance,
+			hPrevInstance,
+			nCmdShow,
+			"HCP65Tester");
 
-	//	cDraw.Init(&sData);
-	//	cTick.Init(&sData);
-	//	cTesterWindow.Init("HCP65 Board Tester", &cNativeFactory, &cTick, &cDraw);
+		cDraw.Init(&sData);
+		cTick.Init(&sData);
+		cTesterWindow.Init("HCP65 Board Tester", &cNativeFactory, &cTick, &cDraw);
 
-	//	cTesterWindow.Show();
+		cTesterWindow.Show();
 
-	//	cTesterWindow.Kill();
+		cTesterWindow.Kill();
 
-	//	cNativeFactory.Kill();
-	//}
+		cNativeFactory.Kill();
+	}
 
 
 	ObjectsKill();
