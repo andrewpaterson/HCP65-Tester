@@ -155,7 +155,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		cDraw.Init(&sData);
 		cTick.Init(&sData);
-		cTesterWindow.Init("HCP65 Board Tester", &cNativeFactory, &cTick, &cDraw);
+		cTesterWindow.Init("HCP65 Board Tester", &cNativeFactory, &cTick, &cDraw, CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
 
 		cTesterWindow.Show();
 
