@@ -182,9 +182,6 @@
     <ProjectReference Include="..\..\CommonLibraries\BaseLib\BaseLib.vcxproj">
       <Project>{e25d2dac-0e80-42b2-8fa7-99b837cf7588}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\CommonLibraries\ImageLib\ImageLib.vcxproj">
-      <Project>{1f518043-b152-4b9c-9d61-ddd6400420ed}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\InputLib\InputLib.vcxproj">
       <Project>{2f64aa34-f1cc-43fe-90ee-90e66824ee55}</Project>
     </ProjectReference>
