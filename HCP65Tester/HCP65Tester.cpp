@@ -181,10 +181,8 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			cNativeFactory.SetRawInput(WinRawInputCallback, cWinInput.GetRaw());
 
 			cComponentInput.Init(&cInput, &pTesterWindow);
-			gcLogger.Info2("RAW: Keyboards added [", SizeToString(cComponentInput.AddKeyboards()), "].", NULL);  //TEMP-INPUT-LOG
-			gcLogger.Info2("RAW: Mice added [", SizeToString(cComponentInput.AddMice()), "].", NULL);  //TEMP-INPUT-LOG
-//TEMP-INPUT-LOG			cComponentInput.AddKeyboards();
-//TEMP-INPUT-LOG			cComponentInput.AddMice();
+			cComponentInput.AddKeyboards();
+			cComponentInput.AddMice();
 			pTesterWindow->SetComponentInput(&cComponentInput);
 
 			pTesterWindow->Show();
