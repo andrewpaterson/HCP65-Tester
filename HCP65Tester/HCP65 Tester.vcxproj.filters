@@ -7,7 +7,10 @@
     <ClCompile Include="TesterWindowTick.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="TesterWindowDraw.cpp">
+    <ClCompile Include="TesterWindowContent.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TesterButtonListener.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="TesterWindowData.cpp">
@@ -50,7 +53,10 @@
     <ClInclude Include="TesterWindowTick.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="TesterWindowDraw.h">
+    <ClInclude Include="TesterWindowContent.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="TesterButtonListener.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="TesterWindowData.h">
