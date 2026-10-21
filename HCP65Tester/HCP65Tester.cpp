@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "BaseLib/Logger.h"
+#include "BaseLib/Operators.h"
 #include "BaseLib/FastFunctions.h"
 #include "BaseLib/FileUtil.h"
 #include "BaseLib/TypeNames.h"
@@ -135,6 +136,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	FastFunctionsInit();
 	TypesInit();
 	TypeConverterInit();
+	OperatorsInit();
 	MemoryInit();
 	DataIOInit();
 	ObjectsInit();
@@ -215,6 +217,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	ObjectsKill();
 	DataIOKill();
 	MemoryKill();
+	OperatorsKill();
 	TypeConverterKill();
 	TypesKill();
 	FastFunctionsKill();
