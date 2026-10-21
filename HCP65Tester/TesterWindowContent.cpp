@@ -27,7 +27,7 @@ bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, const char* szFontFilename
 	Ptr<CButtonImages>		pDefaultImages;
 
 	pWindow->GetColourFormat(&cFormat);
-	mpFont = GenerateFont(szFontFilename, 10.0f, cFormat.meOrder);
+	mpFont = GenerateFont(szFontFilename, 14.0f, cFormat.meOrder);
 	if (mpFont.IsNull())
 	{
 		return false;
