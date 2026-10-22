@@ -107,6 +107,7 @@ Ptr<CFont> CTesterWindowContent::GenerateFont(const char* szFontFilename, float3
 	CTrueTypeFontFactory	cFactory;
 	CImageColourRGB			cColour;
 	CChars					szCharacters;
+	Ptr<CFontDescription>	pDescription;
 	Ptr<CImage>				pImage;
 	Ptr<CFont>				pFont;
 
@@ -122,14 +123,15 @@ Ptr<CFont> CTesterWindowContent::GenerateFont(const char* szFontFilename, float3
 	cColour.Init(0xDF / 255.0f, 0xE1 / 255.0f, 0xE5 / 255.0f);
 	szCharacters.Init(TESTER_FONT_CHARACTERS);
 	cFactory.Init(&cTrueTypeFont, fPixelSize);
-	pImage = cFactory.Rasterise(szCharacters.Text(), &cColour);
+	pDescription = cFactory.Describe((char*)"JetBrains Mono 10px", szCharacters.Text());
+	pImage = cFactory.Rasterise(pDescription, &cColour);
 	if (pImage.IsNotNull())
 	{
 		if (pImage->GetColourOrder() != eOrder)
 		{
 			pImage = CImageColourConverter::ConvertColour(pImage, eOrder);
 		}
-		pFont = cFactory.Generate((char*)"JetBrains Mono 10px", pImage);
+		pFont = OMalloc<CFont>(pDescription, pImage);
 	}
 	cFactory.Kill();
 	szCharacters.Kill();
