@@ -58,6 +58,7 @@ bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, const char* szTextFontFile
 	mpTextArea = OMalloc<CTextArea>(pWindow, mpTextColours, "");
 	mpTextArea->SetColour(TESTER_TEXT_COLOUR);
 	mpTextArea->SetWordWrap(false);
+	mpTextArea->SetAlignment(CSH_Left, CSV_Top);
 	mpScrollPane->SetContent(mpTextArea);
 	mpGrid->AddComponent(mpScrollPane, 0, 0, 1, 1, 1, 1);
 
