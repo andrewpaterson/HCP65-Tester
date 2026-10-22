@@ -1,6 +1,7 @@
 #ifndef __TESTER_WINDOW_CONTENT_H__
 #define __TESTER_WINDOW_CONTENT_H__
 #include "SupportLib/Font.h"
+#include "SupportLib/FontColours.h"
 #include "WindowLib/Window.h"
 #include "WindowLib/GridContainer.h"
 #include "WindowLib/ScrollPane.h"
@@ -18,7 +19,8 @@
 class CTesterWindowContent
 {
 protected:
-	Ptr<CFont>				mpFont;
+	Ptr<CFontColours>		mpTextColours;
+	Ptr<CFontColours>		mpButtonColours;
 	Ptr<CGridContainer>		mpGrid;
 	Ptr<CScrollPane>		mpScrollPane;
 	Ptr<CTextArea>			mpTextArea;
@@ -28,11 +30,11 @@ protected:
 	CTesterButtonListener	mcListener;
 
 public:
-	bool			Init(Ptr<CWindow> pWindow, const char* szFontFilename, const char* szTextFilename);
+	bool			Init(Ptr<CWindow> pWindow, const char* szTextFontFilename, const char* szButtonFontFilename, const char* szTextFilename);
 	void			Kill(void);
 
 protected:
-	Ptr<CFont>		GenerateFont(const char* szFontFilename, float32 fPixelSize, EColourOrder eOrder);
+	Ptr<CFont>		GenerateFont(const char* szFontFilename, const char* szName, float32 fPixelSize, EColourOrder eOrder);
 	bool			ReadText(const char* szTextFilename, CChars* pszText);
 };
 

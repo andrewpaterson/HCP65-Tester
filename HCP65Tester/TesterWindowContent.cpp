@@ -11,6 +11,10 @@
 #include "TesterWindowContent.h"
 
 
+//The light grey of IntelliJ IDEA's dark theme text.
+#define TESTER_TEXT_COLOUR		Set32BitColour((uint8)0xDF, (uint8)0xE1, (uint8)0xE5)
+
+
 //The glyphs generated: printable ASCII and the curly quotes the text uses.
 #define TESTER_FONT_CHARACTERS	" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\xE2\x80\x98\xE2\x80\x99\xE2\x80\x9C\xE2\x80\x9D"
 
@@ -19,23 +23,30 @@
 //
 //
 //////////////////////////////////////////////////////////////////////////
-bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, const char* szFontFilename, const char* szTextFilename)
+bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, const char* szTextFontFilename, const char* szButtonFontFilename, const char* szTextFilename)
 {
 	CChars					szText;
 	CColourFormatHelper		cFormat;
 	Ptr<CButtonImages>		pImages;
 	Ptr<CButtonImages>		pDefaultImages;
+	Ptr<CFont>				pTextFont;
+	Ptr<CFont>				pButtonFont;
 
+	//The fonts are white and coloured as they are drawn.
 	pWindow->GetColourFormat(&cFormat);
-	mpFont = GenerateFont(szFontFilename, 14.0f, cFormat.meOrder);
-	if (mpFont.IsNull())
+	pTextFont = GenerateFont(szTextFontFilename, "Inter 14px", 14.0f, cFormat.meOrder);
+	pButtonFont = GenerateFont(szButtonFontFilename, "JetBrains Mono 14px", 14.0f, cFormat.meOrder);
+	if (pTextFont.IsNull() || pButtonFont.IsNull())
 	{
 		return false;
 	}
+	mpTextColours = OMalloc<CFontColours>(pTextFont);
+	mpButtonColours = OMalloc<CFontColours>(pButtonFont);
 
 	if (!ReadText(szTextFilename, &szText))
 	{
-		mpFont = NULL;
+		mpTextColours = NULL;
+		mpButtonColours = NULL;
 		return false;
 	}
 
@@ -44,7 +55,8 @@ bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, const char* szFontFilename
 
 	//A light translucent thumb like IntelliJ IDEA's dark theme.
 	mpScrollPane = OMalloc<CScrollPane>(pWindow, OMalloc<CScrollBarImages>(8, Set32BitColour((uint8)200, (uint8)200, (uint8)200, (uint8)128), &cFormat));
-	mpTextArea = OMalloc<CTextArea>(pWindow, mpFont, "");
+	mpTextArea = OMalloc<CTextArea>(pWindow, mpTextColours, "");
+	mpTextArea->SetColour(TESTER_TEXT_COLOUR);
 	mpTextArea->SetWordWrap(false);
 	mpScrollPane->SetContent(mpTextArea);
 	mpGrid->AddComponent(mpScrollPane, 0, 0, 1, 1, 1, 1);
@@ -56,8 +68,8 @@ bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, const char* szFontFilename
 
 	pImages = CJewelButtonImages::CreateButtonImages(&cFormat);
 	pDefaultImages = CJewelButtonImages::CreateDefaultButtonImages(&cFormat);
-	mpOK = OMalloc<CButton>(pWindow, pImages, pDefaultImages, mpFont, "OK");
-	mpCancel = OMalloc<CButton>(pWindow, pImages, pDefaultImages, mpFont, "Cancel");
+	mpOK = OMalloc<CButton>(pWindow, pImages, pDefaultImages, mpButtonColours->GetFont(TESTER_TEXT_COLOUR), "OK");
+	mpCancel = OMalloc<CButton>(pWindow, pImages, pDefaultImages, mpButtonColours->GetFont(TESTER_TEXT_COLOUR), "Cancel");
 	mpOK->AddListener(&mcListener);
 	mpCancel->AddListener(&mcListener);
 	pWindow->SetDefaultButton(mpOK);
@@ -91,17 +103,18 @@ void CTesterWindowContent::Kill(void)
 	mpTextArea = NULL;
 	mpScrollPane = NULL;
 	mpGrid = NULL;
-	mpFont = NULL;
+	mpButtonColours = NULL;
+	mpTextColours = NULL;
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Rasterises the glyphs from the TrueType font into an image in the
-// window's colour order and makes a font from them.
+// Rasterises the glyphs from the TrueType font in white into an image in
+// the window's colour order and makes a font from them.
 //
 //////////////////////////////////////////////////////////////////////////
-Ptr<CFont> CTesterWindowContent::GenerateFont(const char* szFontFilename, float32 fPixelSize, EColourOrder eOrder)
+Ptr<CFont> CTesterWindowContent::GenerateFont(const char* szFontFilename, const char* szName, float32 fPixelSize, EColourOrder eOrder)
 {
 	CTrueTypeFont			cTrueTypeFont;
 	CTrueTypeFontFactory	cFactory;
@@ -119,11 +132,10 @@ Ptr<CFont> CTesterWindowContent::GenerateFont(const char* szFontFilename, float3
 		return NULL;
 	}
 
-	//The light grey of IntelliJ IDEA's dark theme text.
-	cColour.Init(0xDF / 255.0f, 0xE1 / 255.0f, 0xE5 / 255.0f);
+	cColour.Init(1.0f, 1.0f, 1.0f);
 	szCharacters.Init(TESTER_FONT_CHARACTERS);
 	cFactory.Init(&cTrueTypeFont, fPixelSize);
-	pDescription = cFactory.Describe((char*)"JetBrains Mono 10px", szCharacters.Text());
+	pDescription = cFactory.Describe((char*)szName, szCharacters.Text());
 	pImage = cFactory.Rasterise(pDescription, &cColour);
 	if (pImage.IsNotNull())
 	{

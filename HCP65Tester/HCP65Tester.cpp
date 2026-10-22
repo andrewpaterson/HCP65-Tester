@@ -171,7 +171,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		pTesterWindow = OMalloc<CWindow>("HCP65 Board Tester", &cNativeFactory, pTick, OMalloc<CClearCanvasDraw>(Set32BitColour((uint8)0x1E, (uint8)0x1F, (uint8)0x22)), CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
 		ORoot()->Add(pTesterWindow);
 
-		if (cContent.Init(pTesterWindow, "Resources/JetBrainsMonoNL-Regular.ttf", "Resources/PrideAndPrejudice.txt"))
+		if (cContent.Init(pTesterWindow, "Resources/InterVariable.ttf", "Resources/JetBrainsMonoNL-Regular.ttf", "Resources/PrideAndPrejudice.txt"))
 		{
 			//The devices are described by the XML so they are added after it is read.
 			cInput.Init(NULL);
