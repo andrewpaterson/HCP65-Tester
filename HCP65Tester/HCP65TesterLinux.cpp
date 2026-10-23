@@ -1,5 +1,4 @@
 #include "BaseLib/Logger.h"
-#include "BaseLib/Operators.h"
 #include "BaseLib/FastFunctions.h"
 #include "BaseLib/TypeNames.h"
 #include "BaseLib/TypeConverter.h"
@@ -30,7 +29,6 @@ int main(int argc, char* argv[])
 	FastFunctionsInit();
 	TypesInit();
 	TypeConverterInit();
-	OperatorsInit();
 	MemoryInit();
 	DataIOInit();
 	ObjectsInit();
@@ -104,7 +102,6 @@ int main(int argc, char* argv[])
 	ObjectsKill();
 	DataIOKill();
 	MemoryKill();
-	OperatorsKill();
 	TypeConverterKill();
 	TypesKill();
 	FastFunctionsKill();
