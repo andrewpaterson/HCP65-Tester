@@ -34,6 +34,15 @@
     <ClCompile Include="CommonBoard.cpp">
       <Filter>Source\Specific</Filter>
     </ClCompile>
+    <ClCompile Include="CircuitCanvas.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CircuitCanvasDraw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TesterDialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -79,6 +88,15 @@
     </ClInclude>
     <ClInclude Include="CommonBoard.h">
       <Filter>Source\Specific</Filter>
+    </ClInclude>
+    <ClInclude Include="CircuitCanvas.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="CircuitCanvasDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="TesterDialog.h">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

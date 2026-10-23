@@ -94,6 +94,9 @@ vcxproj_sources(X11LIB_SOURCES "${X11LIB_DIR}/X11Lib.vcxproj")
 # Only the window's sources; HCP65Tester.cpp (WinMain) and the board's are Windows only.
 set(TESTER_SOURCES
 	"${TESTER_DIR}/HCP65TesterLinux.cpp"
+	"${TESTER_DIR}/CircuitCanvas.cpp"
+	"${TESTER_DIR}/CircuitCanvasDraw.cpp"
+	"${TESTER_DIR}/TesterDialog.cpp"
 	"${TESTER_DIR}/TesterButtonListener.cpp"
 	"${TESTER_DIR}/TesterWindowContent.cpp"
 	"${TESTER_DIR}/TesterWindowData.cpp"

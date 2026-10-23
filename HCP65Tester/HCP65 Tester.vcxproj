@@ -177,6 +177,9 @@
     <ClCompile Include="TesterWindowTick.cpp" />
     <ClCompile Include="UART.cpp" />
     <ClCompile Include="WindowsCOM.cpp" />
+    <ClCompile Include="CircuitCanvas.cpp" />
+    <ClCompile Include="CircuitCanvasDraw.cpp" />
+    <ClCompile Include="TesterDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AddressDecodeBoard.h" />
@@ -189,6 +192,9 @@
     <ClInclude Include="TesterWindowTick.h" />
     <ClInclude Include="UART.h" />
     <ClInclude Include="WindowsCOM.h" />
+    <ClInclude Include="CircuitCanvas.h" />
+    <ClInclude Include="CircuitCanvasDraw.h" />
+    <ClInclude Include="TesterDialog.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CommonLibraries\BaseLib\BaseLib.vcxproj">

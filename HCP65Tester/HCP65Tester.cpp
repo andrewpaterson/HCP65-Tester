@@ -12,6 +12,7 @@
 #include "InputLib/Input.h"
 #include "WindowLib/Window.h"
 #include "WindowLib/ClearCanvasDraw.h"
+#include "WindowLib/JewelColours.h"
 #include "WindowLib/ComponentInput.h"
 #include "WinGdiLib/WinGDIWindowFactory.h"
 #include "WinInputLib/WinInput.h"
@@ -168,10 +169,10 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		//The window is in the root so that changing pointers into its components doesn't make the objects work out again which
 		//of them are still on the stack.  Its tick is allocated, not on the stack, because stack objects can't be under the root.
 		pTick = OMalloc<CTesterWindowTick>(&sData);
-		pTesterWindow = OMalloc<CWindow>("HCP65 Board Tester", &cNativeFactory, pTick, OMalloc<CClearCanvasDraw>(Set32BitColour((uint8)0x1E, (uint8)0x1F, (uint8)0x22)), CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
+		pTesterWindow = OMalloc<CWindow>("HCP65 Board Tester", &cNativeFactory, pTick, OMalloc<CClearCanvasDraw>(JEWEL_PANEL), CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
 		ORoot()->Add(pTesterWindow);
 
-		if (cContent.Init(pTesterWindow, "Resources/InterVariable.ttf", "Resources/JetBrainsMonoNL-Regular.ttf", "Resources/PrideAndPrejudice.txt"))
+		if (cContent.Init(pTesterWindow, &sData, "Resources/InterVariable.ttf", "Resources/Icons"))
 		{
 			//The devices are described by the XML so they are added after it is read.
 			cInput.Init(NULL);
@@ -185,6 +186,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			cComponentInput.AddMice();
 			pTesterWindow->SetComponentInput(&cComponentInput);
 
+			pTesterWindow->SetWindowSize(1280, 800);
 			pTesterWindow->Show();
 
 			pTesterWindow->SetComponentInput(NULL);
