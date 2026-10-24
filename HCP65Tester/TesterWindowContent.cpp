@@ -87,7 +87,7 @@ static STesterActionDesc gasTesterActions[NUM_TESTER_ACTIONS] =
 //
 //
 //////////////////////////////////////////////////////////////////////////
-bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, STesterWindowData* psData, const char* szFontFilename, const char* szIconDirectory, const char* szPropagationTimes)
+bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, STesterWindowData* psData, const char* szFontFilename, const char* szIconDirectory, const char* szPropagationTimes, const char* szCircuitFontDirectory)
 {
 	CColourFormatHelper		cFormat;
 	Ptr<CGridContainer>		pGrid;
@@ -112,13 +112,13 @@ bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, STesterWindowData* psData,
 	mcListListener.Init(this);
 
 	//Before anything that can fail; Kill always kills it.
-	if (!mcCircuit.Init(szPropagationTimes))
+	pWindow->GetColourFormat(&cFormat);
+	if (!mcCircuit.Init(szPropagationTimes, szCircuitFontDirectory, cFormat.meOrder))
 	{
 		return false;
 	}
 
 	//The font is white and coloured as it is drawn.
-	pWindow->GetColourFormat(&cFormat);
 	pWhite = GenerateFont(szFontFilename, "Inter 13px", 13.0f, cFormat.meOrder);
 	if (pWhite.IsNull())
 	{

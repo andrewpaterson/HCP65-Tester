@@ -6,6 +6,8 @@
 #include "LogicimLib/AndGateView.h"
 #include "LogicimLib/OrGateView.h"
 #include "LogicimLib/BufferView.h"
+#include "LogicimLib/ValueView.h"
+#include "StandardLib/Objects.h"
 #include "TesterCircuit.h"
 
 
@@ -14,17 +16,34 @@
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Kill must be called even when this fails.
+// Kill must be called even when this fails.  The circuit's text is
+// coloured in eColourOrder, the canvas's.
 //
 //////////////////////////////////////////////////////////////////////////
-bool CTesterCircuit::Init(const char* szPropagationTimes)
+bool CTesterCircuit::Init(const char* szPropagationTimes, const char* szFontDirectory, EColourOrder eColourOrder)
 {
+	Ptr<CFontFamily>	pFamily;
+	bool				bFonts;
+
 	mbSimulation = false;
 	mpcEnable = NULL;
 	mcColours.InitDark();
 	mcFamilies.Init();
 	mcView.Init();
-	if (!mcFamilies.Load(szPropagationTimes))
+
+	//Nothing else holds the font families, so they are rooted.
+	bFonts = LoadCircuitFonts(&mcFonts, szFontDirectory, eColourOrder);
+	pFamily = mcFonts.GetSansSerif();
+	if (pFamily.IsNotNull())
+	{
+		ORoot()->Add(pFamily);
+	}
+	pFamily = mcFonts.GetMonospaced();
+	if (pFamily.IsNotNull())
+	{
+		ORoot()->Add(pFamily);
+	}
+	if (!bFonts || !mcFamilies.Load(szPropagationTimes))
 	{
 		return false;
 	}
@@ -49,14 +68,30 @@ void CTesterCircuit::Kill(void)
 	}
 	mcFamilies.Kill();
 	mcColours.Kill();
+	RemoveFontFamily(mcFonts.GetSansSerif());
+	RemoveFontFamily(mcFonts.GetMonospaced());
+	mcFonts.Kill();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterCircuit::RemoveFontFamily(Ptr<CFontFamily> pFamily)
+{
+	if (pFamily.IsNotNull())
+	{
+		ORoot()->Remove(pFamily);
+	}
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 //
 // The NAND's output runs through two inverters and back to its lower
-// input, so it oscillates while its upper input is high.  Below are the
-// other gates, unconnected.
+// input, so it oscillates while its upper input is high.  A probe shows
+// the buffered output.  Below are the other gates, unconnected.
 //
 //////////////////////////////////////////////////////////////////////////
 void CTesterCircuit::CreateViews(void)
@@ -69,6 +104,7 @@ void CTesterCircuit::CreateViews(void)
 	CNorGateView*		pcNor;
 	CXorGateView*		pcXor;
 	CXnorGateView*		pcXnor;
+	CProbeView*			pcProbe;
 
 	pcNand = NewMalloc<CNandGateView>();
 	pcNand->Init(-17, 0, ROT_West, "U1", TESTER_FAMILY, false, 2, 1);
@@ -92,6 +128,9 @@ void CTesterCircuit::CreateViews(void)
 	mcView.AddTrace(-20, 4, -20, 1);
 	mcView.AddTrace(-20, 1, -18, 1);
 	mcView.AddTrace(3, 0, 9, 0);
+	pcProbe = NewMalloc<CProbeView>();
+	pcProbe->Init(9, 0, ROT_East, "", TESTER_FAMILY, false, 1, RADIX_Binary, &mcFonts);
+	mcView.Add(pcProbe);
 
 	pcAnd = NewMalloc<CAndGateView>();
 	pcAnd->Init(-24, 12, ROT_West, "", TESTER_FAMILY, false, 2, 1);
@@ -190,5 +229,6 @@ void CTesterCircuit::Run(int64 iTimeForward)
 //////////////////////////////////////////////////////////////////////////
 CCircuitView* CTesterCircuit::GetView(void) { return &mcView; }
 CCircuitColours* CTesterCircuit::GetColours(void) { return &mcColours; }
+CCircuitFonts* CTesterCircuit::GetFonts(void) { return &mcFonts; }
 int64 CTesterCircuit::GetTime(void) { return mbSimulation ? mcSimulation.GetTime() : -1; }
 

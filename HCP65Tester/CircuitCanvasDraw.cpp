@@ -16,6 +16,7 @@ void CCircuitCanvasDraw::Init(CTesterCircuit* pcCircuit)
 	CCanvasDraw::Init();
 	mpcCircuit = pcCircuit;
 	mpMap = OMalloc<CGeometryMap>();
+	mpSprites = OMalloc<CSpriteMap>();
 	mpDestImage = NULL;
 	mcViewport.Init(0, 0);
 	mbGrid = true;
@@ -32,6 +33,7 @@ void CCircuitCanvasDraw::Class(void)
 	CCanvasDraw::Class();
 	U_Pointer(mpcCircuit);
 	M_Pointer(mpMap);
+	M_Pointer(mpSprites);
 	M_Pointer(mpDestImage);
 	U_Data(CCircuitViewport, mcViewport);
 	U_Bool(mbGrid);
@@ -89,7 +91,13 @@ bool CCircuitCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 	mcViewport.SetSize(sSize.x, sSize.y);
 	mpMap->Clear();
 	mpMap->SetViewport(pImage);
-	cPainter.Init(&mcViewport, &mpMap, pcColours, mpcCircuit->GetTime());
+	mpSprites->Clear();
+	if (mpSprites->GetViewport() != pImage)
+	{
+		mpSprites->SetViewport(pImage);
+		mpSprites->SetBlitterCache(mpSprites->CreateBlitterCache());
+	}
+	cPainter.Init(&mcViewport, &mpMap, &mpSprites, pcColours, mpcCircuit->GetFonts(), mpcCircuit->GetTime());
 
 	mpMap->AddRectangle(0, 0, sSize.x, sSize.y, pcColours->msBackground);
 	if (mbGrid)
@@ -101,6 +109,7 @@ bool CCircuitCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 
 	cRect.Init(0, 0, sSize.x, sSize.y);
 	bResult = mpMap->Blit(&cRect, false);
+	bResult &= mpSprites->Blit(&cRect, true);
 	if (mpDestImage.IsNotNull())
 	{
 		pCanvas->DrawImage(0, 0, mpDestImage);

@@ -111,7 +111,7 @@ protected:
 	float64					mfNanosecondsPerMillisecond;  //How fast the simulation runs.
 
 public:
-	bool			Init(Ptr<CWindow> pWindow, STesterWindowData* psData, const char* szFontFilename, const char* szIconDirectory, const char* szPropagationTimes);
+	bool			Init(Ptr<CWindow> pWindow, STesterWindowData* psData, const char* szFontFilename, const char* szIconDirectory, const char* szPropagationTimes, const char* szCircuitFontDirectory);
 	void			Kill(void);
 
 	void			ButtonClicked(CButton* pcButton);

@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 			pTesterWindow = OMalloc<CWindow>("HCP65 Board Tester", &cNativeFactory, pTick, OMalloc<CClearCanvasDraw>(JEWEL_PANEL), CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
 			ORoot()->Add(pTesterWindow);
 
-			if (cContent.Init(pTesterWindow, &sData, "Resources/InterVariable.ttf", "Resources/Icons", "Resources/PropagationTimes.csv"))
+			if (cContent.Init(pTesterWindow, &sData, "Resources/InterVariable.ttf", "Resources/Icons", "Resources/PropagationTimes.csv", "Resources/Fonts"))
 			{
 				//The devices are described by the XML so they are added after it is read.
 				cInput.Init(NULL);

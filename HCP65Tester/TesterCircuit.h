@@ -3,6 +3,7 @@
 #include "MicroprocessorLib/CircuitSimulation.h"
 #include "MicroprocessorLib/FamilyVoltageConfigurationStore.h"
 #include "LogicimLib/CircuitView.h"
+#include "LogicimLib/CircuitFonts.h"
 
 
 //The circuit shown in the tester's editor until circuits can be loaded: a ring oscillator (a NAND enabled by a supply
@@ -14,11 +15,12 @@ protected:
 	CCircuitSimulation					mcSimulation;
 	CCircuitView						mcView;
 	CCircuitColours						mcColours;
+	CCircuitFonts						mcFonts;
 	CTraceView*							mpcEnable;
 	bool								mbSimulation;
 
 public:
-	bool				Init(const char* szPropagationTimes);
+	bool				Init(const char* szPropagationTimes, const char* szFontDirectory, EColourOrder eColourOrder);
 	void				Kill(void);
 
 	bool				Reset(void);
@@ -26,10 +28,12 @@ public:
 
 	CCircuitView*		GetView(void);
 	CCircuitColours*	GetColours(void);
+	CCircuitFonts*		GetFonts(void);
 	int64				GetTime(void);
 
 protected:
 	void				CreateViews(void);
+	void				RemoveFontFamily(Ptr<CFontFamily> pFamily);
 	bool				CreateSimulation(void);
 };
 
