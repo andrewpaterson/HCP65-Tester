@@ -12,11 +12,13 @@
 #include "WindowLib/ClearCanvasDraw.h"
 #include "WindowLib/FillContainer.h"
 #include "WindowLib/RoundedBoxCanvasDraw.h"
+#include "MicroprocessorLib/LongTime.h"
 #include "TesterWindowContent.h"
 
 
 //IntelliJ IDEA's new UI dark theme.  The dim text is the tester's own, for the status bar and dividers.
 #define TESTER_DIM_TEXT			Set32BitColour((uint8)0x9D, (uint8)0xA0, (uint8)0xA8)
+#define TESTER_DEFAULT_SPEED	0.25  //Simulated nanoseconds per millisecond.
 
 #define TESTER_ROW_HEIGHT		24
 #define TESTER_DIALOG_WIDTH		440
@@ -85,7 +87,7 @@ static STesterActionDesc gasTesterActions[NUM_TESTER_ACTIONS] =
 //
 //
 //////////////////////////////////////////////////////////////////////////
-bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, STesterWindowData* psData, const char* szFontFilename, const char* szIconDirectory)
+bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, STesterWindowData* psData, const char* szFontFilename, const char* szIconDirectory, const char* szPropagationTimes)
 {
 	CColourFormatHelper		cFormat;
 	Ptr<CGridContainer>		pGrid;
@@ -96,7 +98,8 @@ bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, STesterWindowData* psData,
 	mpsData->pcContent = this;
 	mpsData->eDialog = TD_None;
 	miSimulationCount = 0;
-	mbRunning = false;
+	mbRunning = true;
+	mfNanosecondsPerMillisecond = TESTER_DEFAULT_SPEED;
 	maButtons.Init();
 	maiButtonActions.Init();
 	maMenuItems.Init();
@@ -107,6 +110,12 @@ bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, STesterWindowData* psData,
 	mcButtonListener.Init(this);
 	mcMenuListener.Init(this);
 	mcListListener.Init(this);
+
+	//Before anything that can fail; Kill always kills it.
+	if (!mcCircuit.Init(szPropagationTimes))
+	{
+		return false;
+	}
 
 	//The font is white and coloured as it is drawn.
 	pWindow->GetColourFormat(&cFormat);
@@ -209,6 +218,7 @@ void CTesterWindowContent::Kill(void)
 	}
 	mpFontColours = NULL;
 	mpWindow = NULL;
+	mcCircuit.Kill();
 }
 
 
@@ -569,7 +579,7 @@ Ptr<CComponent> CTesterWindowContent::CreateEditor(void)
 	pSubcircuits = CreateToolWindow("Subcircuits", mpSubcircuits);
 	pSubcircuits->SetDesiredSize(200, -1);
 
-	mpCircuit = OMalloc<CCircuitCanvas>(mpWindow, OMalloc<CCircuitCanvasDraw>(JEWEL_EDITOR, JEWEL_BORDER, JEWEL_BORDER_HOVER), this);
+	mpCircuit = OMalloc<CCircuitCanvas>(mpWindow, OMalloc<CCircuitCanvasDraw>(&mcCircuit), this);
 	mpCircuit->SetAlignment(CSH_Stretch, CSV_Stretch);
 	mpSimulations = CreateList();
 	pSimulations = CreateToolWindow("Simulations", mpSimulations);
@@ -829,6 +839,18 @@ void CTesterWindowContent::DoAction(ETesterAction eAction)
 		mbRunning = false;
 		UpdateInfo();
 		break;
+	case TA_ResetSimulation:
+		mcCircuit.Reset();
+		break;
+	case TA_DefaultSpeed:
+		mfNanosecondsPerMillisecond = TESTER_DEFAULT_SPEED;
+		break;
+	case TA_IncreaseSpeed:
+		mfNanosecondsPerMillisecond *= 2;
+		break;
+	case TA_DecreaseSpeed:
+		mfNanosecondsPerMillisecond /= 2;
+		break;
 	case TA_TogglePointView:
 		pDraw->SetGrid(!pDraw->IsGrid());
 		break;
@@ -847,6 +869,21 @@ void CTesterWindowContent::DoAction(ETesterAction eAction)
 	default:
 		gcLogger.Info2(gasTesterActions[eAction].szName, " isn't done yet.", NULL);
 		break;
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Runs the simulation on by the time since the last tick, scaled by the
+// speed.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterWindowContent::Tick(int64 iUpdateTimeInMilliseconds)
+{
+	if (mbRunning)
+	{
+		mcCircuit.Run(NanosecondsToTime(iUpdateTimeInMilliseconds * mfNanosecondsPerMillisecond));
 	}
 }
 

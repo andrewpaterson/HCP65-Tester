@@ -14,6 +14,7 @@
 #include "TesterWindowData.h"
 #include "TesterDialog.h"
 #include "CircuitCanvas.h"
+#include "TesterCircuit.h"
 
 
 //What a toolbar button or menu item does.  The buttons and menu items are those of Logicim's window.
@@ -104,11 +105,13 @@ protected:
 	CTesterMenuListener		mcMenuListener;
 	CTesterListListener		mcListListener;
 
+	CTesterCircuit			mcCircuit;
 	int						miSimulationCount;
 	bool					mbRunning;
+	float64					mfNanosecondsPerMillisecond;  //How fast the simulation runs.
 
 public:
-	bool			Init(Ptr<CWindow> pWindow, STesterWindowData* psData, const char* szFontFilename, const char* szIconDirectory);
+	bool			Init(Ptr<CWindow> pWindow, STesterWindowData* psData, const char* szFontFilename, const char* szIconDirectory, const char* szPropagationTimes);
 	void			Kill(void);
 
 	void			ButtonClicked(CButton* pcButton);
@@ -117,6 +120,7 @@ public:
 	void			PointerOverCircuit(int x, int y);
 	void			Zoom(float32 fZoom);
 	void			ShowDialog(ETesterDialog eDialog);
+	void			Tick(int64 iUpdateTimeInMilliseconds);
 
 protected:
 	Ptr<CFont>				GenerateFont(const char* szFontFilename, const char* szName, float32 fPixelSize, EColourOrder eOrder);

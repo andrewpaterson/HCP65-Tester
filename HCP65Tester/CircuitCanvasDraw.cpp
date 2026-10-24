@@ -1,20 +1,23 @@
 #include "StandardLib/ClassDefines.h"
 #include "WindowLib/Canvas.h"
+#include "LogicimLib/CircuitPainter.h"
+#include "TesterCircuit.h"
 #include "CircuitCanvasDraw.h"
 
 
 //////////////////////////////////////////////////////////////////////////
 //
+// The circuit isn't owned; it must outlive the draw.
 //
 //////////////////////////////////////////////////////////////////////////
-void CCircuitCanvasDraw::Init(ARGB32 sBackground, ARGB32 sSmallGrid, ARGB32 sLargeGrid)
+void CCircuitCanvasDraw::Init(CTesterCircuit* pcCircuit)
 {
 	PreInit();
 	CCanvasDraw::Init();
-	msBackground = sBackground;
-	msSmallGrid = sSmallGrid;
-	msLargeGrid = sLargeGrid;
-	mfZoom = 1.0f;
+	mpcCircuit = pcCircuit;
+	mpMap = OMalloc<CGeometryMap>();
+	mpDestImage = NULL;
+	mcViewport.Init(0, 0);
 	mbGrid = true;
 	PostInit();
 }
@@ -27,10 +30,10 @@ void CCircuitCanvasDraw::Init(ARGB32 sBackground, ARGB32 sSmallGrid, ARGB32 sLar
 void CCircuitCanvasDraw::Class(void)
 {
 	CCanvasDraw::Class();
-	U_UInt32(msBackground);
-	U_UInt32(msSmallGrid);
-	U_UInt32(msLargeGrid);
-	U_Float32(mfZoom);
+	U_Pointer(mpcCircuit);
+	M_Pointer(mpMap);
+	M_Pointer(mpDestImage);
+	U_Data(CCircuitViewport, mcViewport);
 	U_Bool(mbGrid);
 }
 
@@ -39,17 +42,27 @@ void CCircuitCanvasDraw::Class(void)
 //
 //
 //////////////////////////////////////////////////////////////////////////
+void CCircuitCanvasDraw::Free(void)
+{
+	mcViewport.Kill();
+	CCanvasDraw::Free();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Canvases without an image of their own are drawn into an image the size
+// of the canvas, which is then copied on.
+//
+//////////////////////////////////////////////////////////////////////////
 bool CCircuitCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 {
-	CInt32Rect	cRect;
-	SInt32Vec2	sSize;
-	float32		fSpacing;
-	float32		fX;
-	float32		fY;
-	float32		fStartX;
-	float32		fStartY;
-	int			iDot;
-	ARGB32		sDot;
+	SInt32Vec2			sSize;
+	Ptr<CImage>			pImage;
+	CCircuitPainter		cPainter;
+	CCircuitColours*	pcColours;
+	CInt32Rect			cRect;
+	bool				bResult;
 
 	if (!pCanvas->IsValid())
 	{
@@ -57,46 +70,42 @@ bool CCircuitCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 	}
 
 	sSize = pCanvas->GetActualSize();
-	cRect.Init(0, 0, sSize.x - 1, sSize.y - 1);
-	pCanvas->DrawBox(&cRect, true, msBackground);
-
-	if (!mbGrid || (mfZoom < 0.3f))
+	pImage = pCanvas->GetImageOrNull();
+	if (pImage.IsNull())
 	{
-		return true;
-	}
-
-	fSpacing = GetGridSpacing();
-	sDot = (mfZoom < 1.5f) ? msSmallGrid : msLargeGrid;
-	iDot = (mfZoom < 2.0f) ? 1 : (int)mfZoom;
-
-	//A grid point is at the centre of the canvas.
-	fStartX = (sSize.x / 2.0f);
-	while (fStartX - fSpacing >= 0.0f)
-	{
-		fStartX -= fSpacing;
-	}
-	fStartY = (sSize.y / 2.0f);
-	while (fStartY - fSpacing >= 0.0f)
-	{
-		fStartY -= fSpacing;
-	}
-
-	for (fY = fStartY; fY < sSize.y; fY += fSpacing)
-	{
-		for (fX = fStartX; fX < sSize.x; fX += fSpacing)
+		if (mpDestImage.IsNull() || (mpDestImage->GetWidth() != (uint32)sSize.x) || (mpDestImage->GetHeight() != (uint32)sSize.y) ||
+			(mpDestImage->GetColourFormat() != pCanvas->GetColourFormat()) || (mpDestImage->GetAlphaBits() != pCanvas->GetAlphaBits()))
 		{
-			if (iDot == 1)
-			{
-				pCanvas->DrawPixel((int)fX, (int)fY, sDot);
-			}
-			else
-			{
-				cRect.Init((int)fX - iDot / 2, (int)fY - iDot / 2, (int)fX - iDot / 2 + iDot - 1, (int)fY - iDot / 2 + iDot - 1);
-				pCanvas->DrawBox(&cRect, true, sDot);
-			}
+			mpDestImage = OMalloc<CImage>(sSize.x, sSize.y, pCanvas->GetColourFormat(), pCanvas->GetColourOrder(), pCanvas->GetColourBits(), pCanvas->GetAlphaBits());
 		}
+		pImage = mpDestImage;
 	}
-	return true;
+	else
+	{
+		mpDestImage = NULL;
+	}
+
+	pcColours = mpcCircuit->GetColours();
+	mcViewport.SetSize(sSize.x, sSize.y);
+	mpMap->Clear();
+	mpMap->SetViewport(pImage);
+	cPainter.Init(&mcViewport, &mpMap, pcColours, mpcCircuit->GetTime());
+
+	mpMap->AddRectangle(0, 0, sSize.x, sSize.y, pcColours->msBackground);
+	if (mbGrid)
+	{
+		PaintCircuitGrid(&cPainter);
+	}
+	mpcCircuit->GetView()->Paint(&cPainter);
+	cPainter.Kill();
+
+	cRect.Init(0, 0, sSize.x, sSize.y);
+	bResult = mpMap->Blit(&cRect, false);
+	if (mpDestImage.IsNotNull())
+	{
+		pCanvas->DrawImage(0, 0, mpDestImage);
+	}
+	return bResult;
 }
 
 
@@ -107,15 +116,7 @@ bool CCircuitCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 //////////////////////////////////////////////////////////////////////////
 void CCircuitCanvasDraw::SetZoom(float32 fZoom)
 {
-	if (fZoom < 0.2f)
-	{
-		fZoom = 0.2f;
-	}
-	if (fZoom > 6.0f)
-	{
-		fZoom = 6.0f;
-	}
-	mfZoom = fZoom;
+	mcViewport.SetZoom(fZoom);
 }
 
 
@@ -123,8 +124,9 @@ void CCircuitCanvasDraw::SetZoom(float32 fZoom)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-float32 CCircuitCanvasDraw::GetZoom(void) { return mfZoom; }
+float32 CCircuitCanvasDraw::GetZoom(void) { return (float32)mcViewport.GetZoom(); }
 void CCircuitCanvasDraw::SetGrid(bool bGrid) { mbGrid = bGrid; }
 bool CCircuitCanvasDraw::IsGrid(void) { return mbGrid; }
-float32 CCircuitCanvasDraw::GetGridSpacing(void) { return 10.0f * mfZoom; }
+float32 CCircuitCanvasDraw::GetGridSpacing(void) { return (float32)mcViewport.GetPixelsPerGrid(); }
+CCircuitViewport* CCircuitCanvasDraw::GetViewport(void) { return &mcViewport; }
 

@@ -180,6 +180,7 @@
     <ClCompile Include="CircuitCanvas.cpp" />
     <ClCompile Include="CircuitCanvasDraw.cpp" />
     <ClCompile Include="TesterDialog.cpp" />
+    <ClCompile Include="TesterCircuit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AddressDecodeBoard.h" />
@@ -195,10 +196,17 @@
     <ClInclude Include="CircuitCanvas.h" />
     <ClInclude Include="CircuitCanvasDraw.h" />
     <ClInclude Include="TesterDialog.h" />
+    <ClInclude Include="TesterCircuit.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CommonLibraries\BaseLib\BaseLib.vcxproj">
       <Project>{e25d2dac-0e80-42b2-8fa7-99b837cf7588}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CommonLibraries\LogicimLib\LogicimLib.vcxproj">
+      <Project>{c3dff95a-5e3f-452f-b879-1af5257a94b4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CommonLibraries\MicroprocessorLib\MicroprocessorLib.vcxproj">
+      <Project>{0bf6f66e-80b2-44cf-897c-0f305aaf6af0}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\InputLib\InputLib.vcxproj">
       <Project>{2f64aa34-f1cc-43fe-90ee-90e66824ee55}</Project>

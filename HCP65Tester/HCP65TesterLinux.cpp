@@ -54,10 +54,14 @@ int main(int argc, char* argv[])
 			//The window is in the root so that changing pointers into its components doesn't make the objects work out again which
 			//of them are still on the stack.  Its tick is allocated, not on the stack, because stack objects can't be under the root.
 			pTick = OMalloc<CTesterWindowTick>(&sData);
+			if (getenv("HCP65_SNAPSHOT") != NULL)
+			{
+				pTick->SetSnapshot(getenv("HCP65_SNAPSHOT"), (getenv("HCP65_SNAPSHOT_TICKS") != NULL) ? atoi(getenv("HCP65_SNAPSHOT_TICKS")) : 60);
+			}
 			pTesterWindow = OMalloc<CWindow>("HCP65 Board Tester", &cNativeFactory, pTick, OMalloc<CClearCanvasDraw>(JEWEL_PANEL), CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
 			ORoot()->Add(pTesterWindow);
 
-			if (cContent.Init(pTesterWindow, &sData, "Resources/InterVariable.ttf", "Resources/Icons"))
+			if (cContent.Init(pTesterWindow, &sData, "Resources/InterVariable.ttf", "Resources/Icons", "Resources/PropagationTimes.csv"))
 			{
 				//The devices are described by the XML so they are added after it is read.
 				cInput.Init(NULL);

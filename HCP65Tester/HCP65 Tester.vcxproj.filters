@@ -40,6 +40,9 @@
     <ClCompile Include="CircuitCanvasDraw.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="TesterCircuit.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
     <ClCompile Include="TesterDialog.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -93,6 +96,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="CircuitCanvasDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="TesterCircuit.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="TesterDialog.h">
