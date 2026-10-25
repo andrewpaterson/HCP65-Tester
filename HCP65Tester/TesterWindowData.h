@@ -9,8 +9,11 @@ enum ETesterDialog
 {
 	TD_None,
 	TD_Properties,
+	TD_ChooseComponent,
 	TD_NewSubcircuit,
 	TD_NewSimulation,
+	TD_LoadProject,
+	TD_SaveProject,
 };
 
 

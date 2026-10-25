@@ -23,7 +23,7 @@ void SetupTestBoard(CBoardPins* pcBoard, size uiNumPins)
 	}
 	for (i = 1; i <= uiNumPins; i++)
 	{
-		pcBoard->GroupBus("Board", SizeToString(i), i - 1);
+		pcBoard->GroupBus("Board", SizeToString(i), (int)i - 1);
 	}
 
 
@@ -131,7 +131,7 @@ bool TestTestBoard(CUART* pcUART, CBoardPins* pcBoard, size uiStep)
 		}
 	}
 
-	for (i = uiStep - 1; i > 0; i--)
+	for (i = (int)uiStep - 1; i > 0; i--)
 	{
 		bResult = TestTestBoard(pcUART, pcBoard, uiStep, i);
 		if (!bResult)

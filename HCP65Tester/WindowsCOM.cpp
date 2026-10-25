@@ -121,7 +121,7 @@ bool SendToWindowsCOMPort(HANDLE hSerial, char* szMessage, CChars* pszResult)
     DWORD           uiBytesRead;
 
     // Write data
-    if (!WriteFile(hSerial, szMessage, strlen(szMessage), &uiBytesWritten, NULL))
+    if (!WriteFile(hSerial, szMessage, (DWORD)strlen(szMessage), &uiBytesWritten, NULL))
     {
         szError = WindowsErrorCodeToString(GetLastError());
         gcLogger.Error2(__METHOD__, " Write to COM failed: ", szError, NULL);

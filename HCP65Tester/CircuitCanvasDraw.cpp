@@ -15,6 +15,7 @@ void CCircuitCanvasDraw::Init(CTesterCircuit* pcCircuit)
 	PreInit();
 	CCanvasDraw::Init();
 	mpcCircuit = pcCircuit;
+	mpcPreview = NULL;
 	mpMap = OMalloc<CGeometryMap>();
 	mpSprites = OMalloc<CSpriteMap>();
 	mpDestImage = NULL;
@@ -32,6 +33,7 @@ void CCircuitCanvasDraw::Class(void)
 {
 	CCanvasDraw::Class();
 	U_Pointer(mpcCircuit);
+	U_Pointer(mpcPreview);
 	M_Pointer(mpMap);
 	M_Pointer(mpSprites);
 	M_Pointer(mpDestImage);
@@ -97,14 +99,22 @@ bool CCircuitCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 		mpSprites->SetViewport(pImage);
 		mpSprites->SetBlitterCache(mpSprites->CreateBlitterCache());
 	}
-	cPainter.Init(&mcViewport, &mpMap, &mpSprites, pcColours, mpcCircuit->GetFonts(), mpcCircuit->GetTime());
-
 	mpMap->AddRectangle(0, 0, sSize.x, sSize.y, pcColours->msBackground);
-	if (mbGrid)
+	if (mpcPreview != NULL)
 	{
-		PaintCircuitGrid(&cPainter);
+		FitPreview(sSize);
+		cPainter.Init(&mcViewport, &mpMap, &mpSprites, pcColours, mpcCircuit->GetFonts(), NULL, NULL);
+		mpcPreview->Paint(&cPainter);
 	}
-	mpcCircuit->GetView()->Paint(&cPainter);
+	else
+	{
+		cPainter.Init(&mcViewport, &mpMap, &mpSprites, pcColours, mpcCircuit->GetFonts(), mpcCircuit->GetEditor()->GetViewPath(), mpcCircuit->GetEditor()->GetSimulation());
+		if (mbGrid)
+		{
+			PaintCircuitGrid(&cPainter);
+		}
+		mpcCircuit->GetEditor()->Paint(&cPainter);
+	}
 	cPainter.Kill();
 
 	cRect.Init(0, 0, sSize.x, sSize.y);
@@ -138,4 +148,44 @@ void CCircuitCanvasDraw::SetGrid(bool bGrid) { mbGrid = bGrid; }
 bool CCircuitCanvasDraw::IsGrid(void) { return mbGrid; }
 float32 CCircuitCanvasDraw::GetGridSpacing(void) { return (float32)mcViewport.GetPixelsPerGrid(); }
 CCircuitViewport* CCircuitCanvasDraw::GetViewport(void) { return &mcViewport; }
+void CCircuitCanvasDraw::SetPreview(CComponentView* pcPreview) { mpcPreview = pcPreview; }
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Zooms (no further in than 4 and no further out than 0.2) and scrolls so
+// the preview's box, two grid units bigger each way, fills the canvas.
+//
+//////////////////////////////////////////////////////////////////////////
+void CCircuitCanvasDraw::FitPreview(SInt32Vec2 sSize)
+{
+	SFloat64Vec2	sMinimum;
+	SFloat64Vec2	sMaximum;
+	float64			fZoomX;
+	float64			fZoomY;
+	float64			fZoom;
+	float64			fPixelsPerGrid;
+
+	if (!mpcPreview->GetBoundingBox(&sMinimum, &sMaximum))
+	{
+		sMinimum.Init(-1, -1);
+		sMaximum.Init(1, 1);
+	}
+	mcViewport.SetZoom(1);
+	fPixelsPerGrid = mcViewport.GetPixelsPerGrid();
+	fZoomX = sSize.x / ((sMaximum.x - sMinimum.x + 4) * fPixelsPerGrid);
+	fZoomY = sSize.y / ((sMaximum.y - sMinimum.y + 4) * fPixelsPerGrid);
+	fZoom = (fZoomX < fZoomY) ? fZoomX : fZoomY;
+	if (fZoom > 4)
+	{
+		fZoom = 4;
+	}
+	else if (fZoom < 0.2)
+	{
+		fZoom = 0.2;
+	}
+	mcViewport.SetZoom(fZoom);
+	fPixelsPerGrid = mcViewport.GetPixelsPerGrid();
+	mcViewport.SetPosition(-(sMinimum.x + sMaximum.x) / 2 * fPixelsPerGrid, -(sMinimum.y + sMaximum.y) / 2 * fPixelsPerGrid);
+}
 

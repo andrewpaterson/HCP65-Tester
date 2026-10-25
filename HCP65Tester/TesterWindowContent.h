@@ -106,6 +106,8 @@ protected:
 	CTesterListListener		mcListListener;
 
 	CTesterCircuit			mcCircuit;
+	CChars					mszProjectFilename;  //The project last loaded or saved.
+	CChars					mszChooserSelected;  //The component last chosen.
 	int						miSimulationCount;
 	bool					mbRunning;
 	float64					mfNanosecondsPerMillisecond;  //How fast the simulation runs.
@@ -119,6 +121,7 @@ public:
 	void			ListSelectionChanged(CListContainer* pcList);
 	void			PointerOverCircuit(int x, int y);
 	void			Zoom(float32 fZoom);
+	void			EditProperties(void);
 	void			ShowDialog(ETesterDialog eDialog);
 	void			Tick(int64 iUpdateTimeInMilliseconds);
 
@@ -147,6 +150,8 @@ protected:
 	void					ShowPropertiesDialog(void);
 	void					ShowNewSubcircuitDialog(void);
 	void					ShowNewSimulationDialog(void);
+	void					ShowProjectDialog(bool bSave);
+	void					ShowComponentChooser(void);
 };
 
 

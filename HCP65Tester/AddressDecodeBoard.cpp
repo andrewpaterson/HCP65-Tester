@@ -106,7 +106,7 @@ bool TestAddressDecode(CUART* pcUART, CBoardPins* pcBoard)
 		uiAddress = 0x10'0000;
 		for (;;)
 		{
-			pcBoard->SetBus("Address", uiAddress);
+			pcBoard->SetBus("Address", (uint32)uiAddress);
 			szWriteCommand.Init();
 			pcBoard->GenerateWrite(&szWriteCommand);
 			if (!pcUART->Send(szWriteCommand.Text()))

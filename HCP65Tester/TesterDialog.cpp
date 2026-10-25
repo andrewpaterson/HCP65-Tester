@@ -220,6 +220,17 @@ Ptr<CComboBox> CTesterDialog::AddComboBox(const char* szLabel, const char** aszI
 
 //////////////////////////////////////////////////////////////////////////
 //
+// An editor made by the caller, on a row with its label.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterDialog::AddEditor(const char* szLabel, Ptr<CComponent> pEditor)
+{
+	AddRow(szLabel, pEditor);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
 // A title and a line across the rest of the form, as Logicim's divider
 // fields are shown.
 //
@@ -270,16 +281,40 @@ void CTesterDialog::AddExtraButton(const char* szCaption)
 
 //////////////////////////////////////////////////////////////////////////
 //
+// The body fills the dialog above the buttons, in place of the rows.  The
+// first editor has focus when the dialog opens.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterDialog::SetBody(Ptr<CComponent> pBody, Ptr<CComponent> pFirstEditor)
+{
+	mpForm->RemoveAllComponents();
+	mpForm->SetAlignment(CSH_Stretch, CSV_Stretch);
+	pBody->SetAlignment(CSH_Stretch, CSV_Stretch);
+	mpForm->AddComponent(pBody, 0, 0, 1, 1, 1, 1);
+	mpFirstEditor = pFirstEditor;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
 // Shows the dialog iWidth wide and as tall as its rows and buttons.
 // Returns true if OK closed it.
 //
 //////////////////////////////////////////////////////////////////////////
 bool CTesterDialog::Show(int32 iWidth)
 {
-	int32		iHeight;
-
 	mpForm->SetRequiredSize();
-	iHeight = DIALOG_INSET + mpForm->GetRequiredSize().y + DIALOG_BUTTON_GAP + mpOK->GetDesiredSize().y + DIALOG_INSET;
+	return Show(iWidth, DIALOG_INSET + mpForm->GetRequiredSize().y + DIALOG_BUTTON_GAP + mpOK->GetDesiredSize().y + DIALOG_INSET);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Shows the dialog at the size given.  Returns true if OK closed it.
+//
+//////////////////////////////////////////////////////////////////////////
+bool CTesterDialog::Show(int32 iWidth, int32 iHeight)
+{
 	mpDialog->SetWindowSize(iWidth, iHeight);
 
 	//Like IntelliJ's the first editor has focus, a text field with its text selected so typing replaces it.
@@ -302,8 +337,20 @@ bool CTesterDialog::Show(int32 iWidth)
 //////////////////////////////////////////////////////////////////////////
 void CTesterDialog::ButtonClicked(CUnknown* pcSource, void* pvContext)
 {
+	Close(((CButton*)pcSource)->GetCaption());
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Closes the dialog as if the button captioned szClicked had been
+// clicked, as a double click on a list's row closes it with OK.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterDialog::Close(const char* szClicked)
+{
 	mszClicked.Kill();
-	mszClicked.Init(((CButton*)pcSource)->GetCaption());
+	mszClicked.Init(szClicked);
 	mpDialog->Stop();
 }
 
@@ -318,4 +365,12 @@ char* CTesterDialog::GetClicked(void)
 {
 	return mszClicked.Text();
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+Ptr<CWindow> CTesterDialog::GetWindow(void) { return mpDialog; }
+STesterDialogLook* CTesterDialog::GetLook(void) { return mpsLook; }
 

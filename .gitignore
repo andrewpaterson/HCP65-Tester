@@ -5,3 +5,5 @@
 /HCP65Tester/Debug/*
 /HCP65Tester/Release/*
 /HCP65Tester/Log.txt
+/x64/*
+/HCP65Tester/x64/*

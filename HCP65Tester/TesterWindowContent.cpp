@@ -12,6 +12,8 @@
 #include "WindowLib/ClearCanvasDraw.h"
 #include "WindowLib/FillContainer.h"
 #include "WindowLib/RoundedBoxCanvasDraw.h"
+#include "TesterComponentChooser.h"
+#include "LogicimLib/ComponentProperties.h"
 #include "MicroprocessorLib/LongTime.h"
 #include "TesterWindowContent.h"
 
@@ -113,6 +115,8 @@ bool CTesterWindowContent::Init(Ptr<CWindow> pWindow, STesterWindowData* psData,
 
 	//Before anything that can fail; Kill always kills it.
 	pWindow->GetColourFormat(&cFormat);
+	mszProjectFilename.Init("Project.xml");
+	mszChooserSelected.Init();
 	if (!mcCircuit.Init(szPropagationTimes, szCircuitFontDirectory, cFormat.meOrder))
 	{
 		return false;
@@ -219,6 +223,8 @@ void CTesterWindowContent::Kill(void)
 	mpFontColours = NULL;
 	mpWindow = NULL;
 	mcCircuit.Kill();
+	mszProjectFilename.Kill();
+	mszChooserSelected.Kill();
 }
 
 
@@ -579,7 +585,7 @@ Ptr<CComponent> CTesterWindowContent::CreateEditor(void)
 	pSubcircuits = CreateToolWindow("Subcircuits", mpSubcircuits);
 	pSubcircuits->SetDesiredSize(200, -1);
 
-	mpCircuit = OMalloc<CCircuitCanvas>(mpWindow, OMalloc<CCircuitCanvasDraw>(&mcCircuit), this);
+	mpCircuit = OMalloc<CCircuitCanvas>(mpWindow, OMalloc<CCircuitCanvasDraw>(&mcCircuit), this, mcCircuit.GetEditor());
 	mpCircuit->SetAlignment(CSH_Stretch, CSV_Stretch);
 	mpSimulations = CreateList();
 	pSimulations = CreateToolWindow("Simulations", mpSimulations);
@@ -719,26 +725,26 @@ void AppendTenths(CChars* psz, float32 f)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// x and y are relative to the circuit's top left.  Shown in grid units
-// from the centre, as Logicim does.
+// x and y are relative to the circuit's top left.  Shown in grid units,
+// as Logicim does.
 //
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowContent::PointerOverCircuit(int x, int y)
 {
-	CChars		sz;
-	SInt32Vec2	sSize;
-	float32		fSpacing;
+	CChars			sz;
+	SFloat64Vec2	sScreen;
+	SFloat64Vec2	sGrid;
 
-	sSize = mpCircuit->GetActualSize();
-	fSpacing = mpCircuit->GetCircuitDraw()->GetGridSpacing();
+	sScreen.Init(x, y);
+	mpCircuit->GetCircuitDraw()->GetViewport()->ScreenToGrid(&sGrid, &sScreen);
 
 	sz.Init("X ");
-	AppendTenths(&sz, (x - sSize.x / 2) / fSpacing);
+	AppendTenths(&sz, (float32)sGrid.x);
 	mpMouseXInfo->SetText(sz.Text());
 	sz.Kill();
 
 	sz.Init("Y ");
-	AppendTenths(&sz, (y - sSize.y / 2) / fSpacing);
+	AppendTenths(&sz, (float32)sGrid.y);
 	mpMouseYInfo->SetText(sz.Text());
 	sz.Kill();
 }
@@ -757,6 +763,18 @@ void CTesterWindowContent::Zoom(float32 fZoom)
 	AppendTenths(&sz, mpCircuit->GetCircuitDraw()->GetZoom());
 	mpZoomInfo->SetText(sz.Text());
 	sz.Kill();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Shows the properties of the hovered or selected component on the next
+// tick, as the Properties action does.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterWindowContent::EditProperties(void)
+{
+	mpsData->eDialog = TD_Properties;
 }
 
 
@@ -810,17 +828,47 @@ void CTesterWindowContent::ListSelectionChanged(CListContainer* pcList)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// The view and dialog actions work, the rest are logged.  A dialog is
-// shown by the window's next tick.
+// The view, dialog and editing actions work, the rest are logged.  A
+// dialog is shown by the window's next tick.  Logicim's add actions don't
+// do anything yet; here those for a component place one.
 //
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowContent::DoAction(ETesterAction eAction)
 {
 	Ptr<CCircuitCanvasDraw>	pDraw;
+	CCircuitEditor*			pcEditor;
 
 	pDraw = mpCircuit->GetCircuitDraw();
+	pcEditor = mcCircuit.GetEditor();
 	switch (eAction)
 	{
+	case TA_LoadProject:
+		mpsData->eDialog = TD_LoadProject;
+		break;
+	case TA_SaveProject:
+		mpsData->eDialog = TD_SaveProject;
+		break;
+	case TA_RotateLeft:
+		pcEditor->RotateLeft();
+		break;
+	case TA_RotateRight:
+		pcEditor->RotateRight();
+		break;
+	case TA_AddSplitter:
+		pcEditor->StartPlaceComponent("Splitter");
+		break;
+	case TA_AddTunnel:
+		pcEditor->StartPlaceComponent("Tunnel");
+		break;
+	case TA_AddPower:
+		pcEditor->StartPlaceComponent("PositivePower");
+		break;
+	case TA_AddLabel:
+		pcEditor->StartPlaceComponent("Label");
+		break;
+	case TA_Delete:
+		pcEditor->Delete();
+		break;
 	case TA_NewSimulation:
 		mpsData->eDialog = TD_NewSimulation;
 		break;
@@ -828,6 +876,8 @@ void CTesterWindowContent::DoAction(ETesterAction eAction)
 		mpsData->eDialog = TD_NewSubcircuit;
 		break;
 	case TA_AddComponent:
+		mpsData->eDialog = TD_ChooseComponent;
+		break;
 	case TA_EditProperties:
 		mpsData->eDialog = TD_Properties;
 		break;
@@ -906,49 +956,144 @@ void CTesterWindowContent::ShowDialog(ETesterDialog eDialog)
 	{
 		ShowNewSimulationDialog();
 	}
+	else if (eDialog == TD_ChooseComponent)
+	{
+		ShowComponentChooser();
+	}
+	else if (eDialog == TD_LoadProject)
+	{
+		ShowProjectDialog(false);
+	}
+	else if (eDialog == TD_SaveProject)
+	{
+		ShowProjectDialog(true);
+	}
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Logicim's property dialog for a pin, its fields made by its reflective
-// property editor: text for strings and numbers, a check box for a bool,
-// a combo box for an enum, and its dividers.
+// Logicim's property editor dialog for the hovered or selected component,
+// as its ReflectivePropertiesPanel: its rotation, then an editor for each
+// of its properties (see CComponentProperties) in order, a text field for
+// text and numbers (a number's unit after its label), a check box for a
+// yes or no, a combo box for a choice, and a divider for a divider.  OK
+// replaces the component with one made from them.  Nothing to edit shows
+// nothing.
 //
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowContent::ShowPropertiesDialog(void)
 {
-	CTesterDialog		cDialog;
-	const char*			aszRotations[] = { "North", "East", "South", "West" };
-	const char*			aszFamilies[] = { "74HC", "74HCT", "74LS", "CMOS 5V" };
-	const char*			aszAlignments[] = { "Left", "Right", "Top", "Bottom", "Not Shown" };
-	const char*			aszAnchours[] = { "Negative", "Center", "Positive" };
-	const char*			aszRadices[] = { "Binary", "Decimal", "Hexadecimal" };
-	Ptr<CTextField>		pName;
-	Ptr<CTextField>		pBitWidth;
+	CTesterDialog			cDialog;
+	const char*				aszRotations[] = { "North", "East", "South", "West" };
+	CCircuitEditor*			pcEditor;
+	CComponentView*			pcComponent;
+	CComponentProperties	cProperties;
+	SComponentProperty*		psProperty;
+	Ptr<CComboBox>			pRotation;
+	CArray<CTextField>		aTextFields;
+	CArray<CCheckBox>		aCheckBoxes;
+	CArray<CComboBox>		aComboBoxes;
+	CArrayInt				aiEditors;  //Each property's editor in its type's array, -1 for a divider.
+	Ptr<CComboBox>			pComboBox;
+	CChars					sz;
+	size					i;
+	size					j;
+	int						iEditor;
+	ERotation				eRotation;
 
-	cDialog.Init(mpWindow, &msDialogLook, "Pin Properties");
-	cDialog.AddComboBox("Rotation", aszRotations, 4, 1);
-	pName = cDialog.AddTextField("Name", "D0");
-	pBitWidth = cDialog.AddTextField("Bit Width", "1");
-	cDialog.AddComboBox("Family", aszFamilies, 4, 0);
-	cDialog.AddCheckBox("Explicit Power Ports", false);
-	cDialog.AddDivider("Instance Location");
-	cDialog.AddComboBox("Alignment", aszAlignments, 5, 0);
-	cDialog.AddComboBox("Anchour", aszAnchours, 3, 1);
-	cDialog.AddTextField("Weight", "0");
-	cDialog.AddDivider("Instance Display");
-	cDialog.AddCheckBox("Inverting", false);
-	cDialog.AddCheckBox("Clock Notch", false);
-	cDialog.AddComboBox("Radix", aszRadices, 3, 2);
-	cDialog.AddExtraButton("Save Defaults");
+	pcEditor = mcCircuit.GetEditor();
+	pcComponent = pcEditor->GetPropertiesComponent();
+	if (pcComponent == NULL)
+	{
+		return;
+	}
+	cProperties.Init();
+	pcEditor->GetProperties(pcComponent, &cProperties);
 
-	cDialog.Show(TESTER_DIALOG_WIDTH);
-	gcLogger.Info2("Pin Properties closed by [", cDialog.GetClicked(), "] with name [", pName->GetText(), "] and bit width [", pBitWidth->GetText(), "].", NULL);
+	sz.Init(pcComponent->GetType());
+	sz.Append(" Properties");
+	cDialog.Init(mpWindow, &msDialogLook, sz.Text());
+	sz.Kill();
 
-	pName = NULL;
-	pBitWidth = NULL;
+	aTextFields.Init();
+	aCheckBoxes.Init();
+	aComboBoxes.Init();
+	aiEditors.Init();
+	pRotation = cDialog.AddComboBox("Rotation", aszRotations, 4, pcComponent->GetRotation() - ROT_North);
+	for (i = 0; i < cProperties.NumProperties(); i++)
+	{
+		psProperty = cProperties.Get(i);
+		switch (psProperty->eType)
+		{
+		case CPT_Boolean:
+			aiEditors.Add((int)aCheckBoxes.Size());
+			aCheckBoxes.Add(cDialog.AddCheckBox(psProperty->szLabel.Text(), psProperty->szValue.Equals("true")));
+			break;
+		case CPT_Choice:
+			pComboBox = OMalloc<CComboBox>(cDialog.GetWindow(), msDialogLook.pTheme);
+			for (j = 0; j < psProperty->aszChoices.NumElements(); j++)
+			{
+				pComboBox->AddItem(psProperty->aszChoices.GetText(j));
+			}
+			pComboBox->Select((int32)cProperties.GetChoice(psProperty->szName.Text(), 0));
+			pComboBox->SetAlignment(CSH_Stretch, CSV_Center);
+			cDialog.AddEditor(psProperty->szLabel.Text(), pComboBox);
+			aiEditors.Add((int)aComboBoxes.Size());
+			aComboBoxes.Add(pComboBox);
+			break;
+		case CPT_Divider:
+			cDialog.AddDivider(psProperty->szLabel.Text());
+			aiEditors.Add(-1);
+			break;
+		default:
+			sz.Init(psProperty->szLabel);
+			if (!psProperty->szUnit.Empty())
+			{
+				sz.Append(" (");
+				sz.Append(psProperty->szUnit);
+				sz.Append(")");
+			}
+			aiEditors.Add((int)aTextFields.Size());
+			aTextFields.Add(cDialog.AddTextField(sz.Text(), psProperty->szValue.Text()));
+			sz.Kill();
+			break;
+		}
+	}
+
+	if (cDialog.Show(TESTER_DIALOG_WIDTH))
+	{
+		for (i = 0; i < cProperties.NumProperties(); i++)
+		{
+			psProperty = cProperties.Get(i);
+			iEditor = aiEditors.GetValue(i);
+			switch (psProperty->eType)
+			{
+			case CPT_Boolean:
+				psProperty->szValue.Set(aCheckBoxes.Get(iEditor)->IsTicked() ? "true" : "false");
+				break;
+			case CPT_Choice:
+				psProperty->szValue.Set(aComboBoxes.Get(iEditor)->GetSelectedText());
+				break;
+			case CPT_Divider:
+				break;
+			default:
+				psProperty->szValue.Set(aTextFields.Get(iEditor)->GetText());
+				break;
+			}
+		}
+		eRotation = (ERotation)(ROT_North + pRotation->GetSelected());
+		pcEditor->SetProperties(pcComponent, &cProperties, eRotation);
+	}
+
+	pComboBox = NULL;
+	pRotation = NULL;
+	aiEditors.Kill();
+	aComboBoxes.Kill();
+	aCheckBoxes.Kill();
+	aTextFields.Kill();
 	cDialog.Kill();
+	cProperties.Kill();
 }
 
 
@@ -1015,6 +1160,87 @@ void CTesterWindowContent::ShowNewSimulationDialog(void)
 	}
 
 	pName = NULL;
+	cDialog.Kill();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Places the component chosen, at the pointer, or at the middle of the
+// circuit if the pointer has never been over it.  The chooser opens again
+// on the library of the component last chosen.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterWindowContent::ShowComponentChooser(void)
+{
+	CTesterComponentChooser	cChooser;
+	CCircuitEditor*			pcEditor;
+	char*					szChosen;
+	bool					bSubcircuit;
+	bool					bPlaced;
+	SFloat64Vec2			sScreen;
+	SFloat64Vec2			sGrid;
+	SInt32Vec2				sSize;
+
+	cChooser.Init(mpWindow, &msDialogLook, &mcCircuit, mszChooserSelected.Text());
+	if (cChooser.Show())
+	{
+		szChosen = cChooser.GetChosen(&bSubcircuit);
+		mszChooserSelected.Set(szChosen);
+		pcEditor = mcCircuit.GetEditor();
+		bPlaced = bSubcircuit ? pcEditor->StartPlaceSubcircuit(szChosen) : pcEditor->StartPlaceComponent(szChosen);
+		if (!bPlaced)
+		{
+			sSize = mpCircuit->GetActualSize();
+			sScreen.Init(sSize.x / 2, sSize.y / 2);
+			mpCircuit->GetCircuitDraw()->GetViewport()->ScreenToGrid(&sGrid, &sScreen);
+			pcEditor->PointerMoved(sGrid);
+			if (bSubcircuit)
+			{
+				pcEditor->StartPlaceSubcircuit(szChosen);
+			}
+			else
+			{
+				pcEditor->StartPlaceComponent(szChosen);
+			}
+		}
+	}
+	cChooser.Kill();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Asks for the project file to load or save, the last one used to start
+// with.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterWindowContent::ShowProjectDialog(bool bSave)
+{
+	CTesterDialog		cDialog;
+	Ptr<CTextField>		pFilename;
+	char*				szFilename;
+	bool				bResult;
+
+	cDialog.Init(mpWindow, &msDialogLook, bSave ? "Save Project" : "Load Project");
+	pFilename = cDialog.AddTextField("File", mszProjectFilename.Text());
+
+	if (cDialog.Show(TESTER_DIALOG_WIDTH))
+	{
+		szFilename = pFilename->GetText();
+		if (szFilename[0] != '\0')
+		{
+			mszProjectFilename.Set(szFilename);
+			bResult = bSave ? mcCircuit.Save(szFilename) : mcCircuit.Load(szFilename);
+			if (bResult)
+			{
+				gcLogger.Info2(bSave ? "Saved [" : "Loaded [", szFilename, "].", NULL);
+			}
+			UpdateInfo();
+		}
+	}
+
+	pFilename = NULL;
 	cDialog.Kill();
 }
 

@@ -94,15 +94,15 @@ bool CBoardPins::ValidateCanAdd(size iPinNumber, char* szPinName)
 		}
 	}
 
-	if (mmPinSignals.HasKey(iPinNumber))
+	if (mmPinSignals.HasKey((int)iPinNumber))
 	{
 		return gcLogger.Error2(__METHOD__, " Cannot add Pin numbered [", SizeToString(iPinNumber), "].  It already exists as a signal.", NULL);
 	}
-	if (mmPinPowers.HasKey(iPinNumber))
+	if (mmPinPowers.HasKey((int)iPinNumber))
 	{
 		return gcLogger.Error2(__METHOD__, " Cannot add Pin numbered [", SizeToString(iPinNumber), "].  It already exists as power.", NULL);
 	}
-	if (mmPinNoConnects.HasKey(iPinNumber))
+	if (mmPinNoConnects.HasKey((int)iPinNumber))
 	{
 		return gcLogger.Error2(__METHOD__, " Cannot add Pin numbered [", SizeToString(iPinNumber), "].  It already exists as a no connect.", NULL);
 	}
@@ -122,8 +122,8 @@ bool CBoardPins::AddSignal(size iPinNumber, char* szPinName, EPinDirection eDire
 		return false;
 	}
 
-	mmPinNames.Put(szPinName, iPinNumber);
-	mmPinSignals.Put(iPinNumber, szPinName);
+	mmPinNames.Put(szPinName, (int)iPinNumber);
+	mmPinSignals.Put((int)iPinNumber, szPinName);
 
 	msOutputs.GrowTo(iPinNumber);
 	msOutputs.Set(iPinNumber - 1, eDirection == PD_Input);
@@ -146,7 +146,7 @@ bool CBoardPins::AddPower(size iPinNumber, EPowerPin ePower)
 		return false;
 	}
 
-	mmPinPowers.Put(iPinNumber, (int)ePower);
+	mmPinPowers.Put((int)iPinNumber, (int)ePower);
 	return true;
 }
 
@@ -162,7 +162,7 @@ bool CBoardPins::AddNoCon(size iPinNumber)
 		return false;
 	}
 
-	mmPinNoConnects.Put(iPinNumber, 0);
+	mmPinNoConnects.Put((int)iPinNumber, 0);
 	return true;
 }
 
@@ -574,7 +574,7 @@ void CBoardPins::UpdateRead(CChars* pszReadResult)
 				iPinNumber = iCount;
 			}
 
-			uiMask = 1 << (3 - j);
+			uiMask = (size)1 << (3 - j);
 			bBit = uiNybble & uiMask;
 			msReadValues.Set(iPinNumber - 1, bBit);
 
@@ -945,7 +945,7 @@ void CBoardPins::PrintPin(CChars* psz, CArrayBit* pcBits, size iPinNumber)
 	bool		bInverted;
 	bool		bBusMember;
 
-	bBusMember = mmPinBusses.HasKey(iPinNumber);
+	bBusMember = mmPinBusses.HasKey((int)iPinNumber);
 	if (!bBusMember)
 	{
 		bBit = pcBits->Get(iPinNumber - 1);
@@ -983,7 +983,7 @@ void CBoardPins::PrintPinActive(CChars* psz, CArrayBit* pcBits, size iPinNumber)
 	char*		szPinName;
 	bool		bBusMember;
 
-	bBusMember = mmPinBusses.HasKey(iPinNumber);
+	bBusMember = mmPinBusses.HasKey((int)iPinNumber);
 	if (!bBusMember)
 	{
 		bBit = pcBits->Get(iPinNumber - 1);
@@ -1126,8 +1126,8 @@ bool CBoardPins::PrintRead(CChars* psz, bool bOnlyActive)
 	for (iPinNumber = 1; iPinNumber <= miNumPins; iPinNumber++)
 	{
 		bOutput = !msOutputs.Get(iPinNumber - 1);
-		bPower = mmPinPowers.HasKey(iPinNumber);
-		bNoConnect = mmPinNoConnects.HasKey(iPinNumber);
+		bPower = mmPinPowers.HasKey((int)iPinNumber);
+		bNoConnect = mmPinNoConnects.HasKey((int)iPinNumber);
 
 		if (!bPower && !bNoConnect)
 		{
@@ -1214,8 +1214,8 @@ void CBoardPins::PrintWrite(CChars* psz, bool bOnlyActive)
 	for (iPinNumber = 1; iPinNumber <= miNumPins; iPinNumber++)
 	{
 		bOutput = !msOutputs.Get(iPinNumber - 1);
-		bPower = mmPinPowers.HasKey(iPinNumber);
-		bNoConnect = mmPinNoConnects.HasKey(iPinNumber);
+		bPower = mmPinPowers.HasKey((int)iPinNumber);
+		bNoConnect = mmPinNoConnects.HasKey((int)iPinNumber);
 
 		if (!bPower && !bNoConnect)
 		{

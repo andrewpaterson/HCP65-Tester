@@ -39,6 +39,9 @@ public:
 //IntelliJ's style: a label and an editor on each row, dividers with a title between groups of rows, and the buttons
 //along the bottom on the right.  OK is the default button, enter clicks it; escape clicks Cancel.
 //
+//A dialog that isn't a form of rows sets a body instead, which fills the dialog above the buttons, and is shown at a
+//size of its own.
+//
 //The dialog's window is in the root while the dialog exists.
 class CTesterDialog : public CButtonListener
 {
@@ -63,11 +66,17 @@ public:
 	Ptr<CTextField>		AddTextField(const char* szLabel, const char* szText);
 	Ptr<CCheckBox>		AddCheckBox(const char* szLabel, bool bTicked);
 	Ptr<CComboBox>		AddComboBox(const char* szLabel, const char** aszItems, int iNumItems, int iSelected);
+	void				AddEditor(const char* szLabel, Ptr<CComponent> pEditor);
 	void				AddDivider(const char* szTitle);
 	void				AddExtraButton(const char* szCaption);
+	void				SetBody(Ptr<CComponent> pBody, Ptr<CComponent> pFirstEditor);
 
 	bool				Show(int32 iWidth);
+	bool				Show(int32 iWidth, int32 iHeight);
+	void				Close(const char* szClicked);
 	char*				GetClicked(void);
+	Ptr<CWindow>		GetWindow(void);
+	STesterDialogLook*	GetLook(void);
 
 	void				ButtonClicked(CUnknown* pcSource, void* pvContext) override;
 
