@@ -26,7 +26,8 @@ protected:
 	CTesterWindowContent*		mpcContent;
 	CCircuitEditor*				mpcEditor;
 	SInt32Vec2					msScroll;
-	int64						miLastRelease;  //When button one was last released, for double clicks, 0 if that was one.
+	SInt32Vec2					msPointer;  //Where the pointer last moved over the canvas, the wheel zooms around it.
+	int64					miLastRelease;  //When button one was last released, for double clicks, 0 if that was one.
 	SInt32Vec2					msLastRelease;
 
 public:

@@ -25,6 +25,7 @@ void CCircuitCanvas::Init(Ptr<CWindow> pWindow, Ptr<CCircuitCanvasDraw> pDraw, C
 	mpcContent = pcContent;
 	mpcEditor = pcEditor;
 	msScroll.Init(0, 0);
+	msPointer.Init(0, 0);
 	miLastRelease = 0;
 	msLastRelease.Init(0, 0);
 	SetCanGetFocus(true);
@@ -43,6 +44,7 @@ void CCircuitCanvas::Class(void)
 	U_Pointer(mpcContent);
 	U_Pointer(mpcEditor);
 	U_Data(SInt32Vec2, msScroll);
+	U_Data(SInt32Vec2, msPointer);
 	U_Int64(miLastRelease);
 	U_Data(SInt32Vec2, msLastRelease);
 }
@@ -55,6 +57,7 @@ void CCircuitCanvas::Class(void)
 //////////////////////////////////////////////////////////////////////////
 void CCircuitCanvas::MovedOver(int x, int y)
 {
+	msPointer.Init(x, y);
 	mpcContent->PointerOverCircuit(x, y);
 	UpdateModifiers();
 	mpcEditor->PointerMoved(ToGrid(x, y));
@@ -63,14 +66,16 @@ void CCircuitCanvas::MovedOver(int x, int y)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Each notch zooms by a tenth, as Logicim's does.
+// Each notch zooms by a tenth, as Logicim's does, keeping the circuit
+// under the pointer where it is.
 //
 //////////////////////////////////////////////////////////////////////////
 bool CCircuitCanvas::Wheel(int iRight, int iDown)
 {
 	if (iDown != 0)
 	{
-		mpcContent->Zoom(mpCircuitDraw->GetZoom() - iDown * 0.1f);
+		mpCircuitDraw->GetViewport()->ZoomAround(msPointer.x, msPointer.y, mpCircuitDraw->GetZoom() - iDown * 0.1f);
+		mpcContent->Zoom(mpCircuitDraw->GetZoom());
 		return true;
 	}
 	return false;
