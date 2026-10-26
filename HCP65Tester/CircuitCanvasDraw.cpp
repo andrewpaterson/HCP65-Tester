@@ -65,7 +65,6 @@ bool CCircuitCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 	Ptr<CImage>			pImage;
 	CCircuitPainter		cPainter;
 	CCircuitColours*	pcColours;
-	CInt32Rect			cRect;
 	bool				bResult;
 
 	if (!pCanvas->IsValid())
@@ -90,36 +89,23 @@ bool CCircuitCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 	}
 
 	pcColours = mpcCircuit->GetColours();
-	mcViewport.SetSize(sSize.x, sSize.y);
-	mpMap->Clear();
-	mpMap->SetViewport(pImage);
-	mpSprites->Clear();
-	if (mpSprites->GetViewport() != pImage)
-	{
-		mpSprites->SetViewport(pImage);
-		mpSprites->SetBlitterCache(mpSprites->CreateBlitterCache());
-	}
-	mpMap->AddRectangle(0, 0, sSize.x, sSize.y, pcColours->msBackground);
 	if (mpcPreview != NULL)
 	{
+		cPainter.InitImage(pImage, &mcViewport, &mpMap, &mpSprites, pcColours, mpcCircuit->GetFonts(), NULL, NULL);
 		FitPreview(sSize);
-		cPainter.Init(&mcViewport, &mpMap, &mpSprites, pcColours, mpcCircuit->GetFonts(), NULL, NULL);
 		mpcPreview->Paint(&cPainter);
 	}
 	else
 	{
-		cPainter.Init(&mcViewport, &mpMap, &mpSprites, pcColours, mpcCircuit->GetFonts(), mpcCircuit->GetEditor()->GetViewPath(), mpcCircuit->GetEditor()->GetSimulation());
+		cPainter.InitImage(pImage, &mcViewport, &mpMap, &mpSprites, pcColours, mpcCircuit->GetFonts(), mpcCircuit->GetEditor()->GetViewPath(), mpcCircuit->GetEditor()->GetSimulation());
 		if (mbGrid)
 		{
 			PaintCircuitGrid(&cPainter);
 		}
 		mpcCircuit->GetEditor()->Paint(&cPainter);
 	}
+	bResult = cPainter.BlitImage();
 	cPainter.Kill();
-
-	cRect.Init(0, 0, sSize.x, sSize.y);
-	bResult = mpMap->Blit(&cRect, false);
-	bResult &= mpSprites->Blit(&cRect, true);
 	if (mpDestImage.IsNotNull())
 	{
 		pCanvas->DrawImage(0, 0, mpDestImage);
