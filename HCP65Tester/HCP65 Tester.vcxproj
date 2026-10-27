@@ -249,9 +249,7 @@
     <ClCompile Include="WindowsCOM.cpp" />
     <ClCompile Include="CircuitCanvas.cpp" />
     <ClCompile Include="CircuitCanvasDraw.cpp" />
-    <ClCompile Include="TesterDialog.cpp" />
     <ClCompile Include="TesterComponentChooser.cpp" />
-    <ClCompile Include="TesterFileChooser.cpp" />
     <ClCompile Include="TesterCircuit.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -267,9 +265,7 @@
     <ClInclude Include="WindowsCOM.h" />
     <ClInclude Include="CircuitCanvas.h" />
     <ClInclude Include="CircuitCanvasDraw.h" />
-    <ClInclude Include="TesterDialog.h" />
     <ClInclude Include="TesterComponentChooser.h" />
-    <ClInclude Include="TesterFileChooser.h" />
     <ClInclude Include="TesterCircuit.h" />
   </ItemGroup>
   <ItemGroup>

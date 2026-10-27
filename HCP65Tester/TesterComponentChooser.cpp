@@ -80,7 +80,7 @@ void CChooserFilterListener::TextChanged(CUnknown* pcSource, void* pvContext)
 // chooser.
 //
 //////////////////////////////////////////////////////////////////////////
-void CTesterComponentChooser::Init(Ptr<CWindow> pOwner, STesterDialogLook* psLook, CTesterCircuit* pcCircuit, const char* szSelected)
+void CTesterComponentChooser::Init(Ptr<CWindow> pOwner, SDialogLook* psLook, CTesterCircuit* pcCircuit, const char* szSelected)
 {
 	Ptr<CComponent>		pBody;
 	CColourFormatHelper	cFormat;
@@ -159,7 +159,7 @@ void CTesterComponentChooser::Kill(void)
 Ptr<CComponent> CTesterComponentChooser::CreateBody(void)
 {
 	Ptr<CWindow>			pWindow;
-	STesterDialogLook*		psLook;
+	SDialogLook*			psLook;
 	Ptr<CGridContainer>		pBody;
 	Ptr<CGridContainer>		pDetails;
 	Ptr<CScrollPane>		pScrollPane;

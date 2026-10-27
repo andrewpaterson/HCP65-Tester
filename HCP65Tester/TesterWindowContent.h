@@ -12,7 +12,7 @@
 #include "WindowLib/Label.h"
 #include "TesterButtonListener.h"
 #include "TesterWindowData.h"
-#include "TesterDialog.h"
+#include "WindowLib/Dialog.h"
 #include "CircuitCanvas.h"
 #include "TesterCircuit.h"
 
@@ -80,7 +80,7 @@ protected:
 	Ptr<CFont>				mpFont;
 	Ptr<CFont>				mpDimFont;
 	Ptr<CWindowTheme>		mpTheme;
-	STesterDialogLook		msDialogLook;
+	SDialogLook				msDialogLook;
 	CArray<CImageCel>		mapIcons;  //One for each ETesterAction, NULL if the action has no icon.
 	Ptr<CImageCel>			mpFileIcon;  //Beside a file in the file chooser, Load Project's beside a folder.
 

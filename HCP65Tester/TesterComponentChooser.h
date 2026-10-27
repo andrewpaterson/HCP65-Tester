@@ -7,7 +7,7 @@
 #include "WindowLib/TextFieldListener.h"
 #include "WindowLib/ScrollPane.h"
 #include "WindowLib/Label.h"
-#include "TesterDialog.h"
+#include "WindowLib/Dialog.h"
 #include "CircuitCanvasDraw.h"
 
 
@@ -52,7 +52,7 @@ public:
 class CTesterComponentChooser
 {
 protected:
-	CTesterDialog			mcDialog;
+	CDialog					mcDialog;
 	CTesterCircuit*			mpcCircuit;
 	Ptr<CTextField>			mpFilter;
 	Ptr<CListContainer>		mpList;
@@ -73,7 +73,7 @@ protected:
 	bool					mbChosenSubcircuit;
 
 public:
-	void			Init(Ptr<CWindow> pOwner, STesterDialogLook* psLook, CTesterCircuit* pcCircuit, const char* szSelected);
+	void			Init(Ptr<CWindow> pOwner, SDialogLook* psLook, CTesterCircuit* pcCircuit, const char* szSelected);
 	void			Kill(void);
 
 	bool			Show(void);

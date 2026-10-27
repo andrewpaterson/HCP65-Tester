@@ -13,7 +13,7 @@
 #include "WindowLib/FillContainer.h"
 #include "WindowLib/RoundedBoxCanvasDraw.h"
 #include "TesterComponentChooser.h"
-#include "TesterFileChooser.h"
+#include "WindowLib/FileChooser.h"
 #include "LogicimLib/ComponentProperties.h"
 #include "MicroprocessorLib/LongTime.h"
 #include "TesterWindowContent.h"
@@ -29,6 +29,14 @@
 
 //The glyphs generated: printable ASCII.
 #define TESTER_FONT_CHARACTERS	" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+
+
+//The project file chooser's Files of Type, Logicim's files first as its file chooser's filter is.
+static SFileChooserType gasProjectFileTypes[] =
+{
+	{ "Logicim Projects (*.xml)", "xml" },
+	{ "All Files", NULL },
+};
 
 
 struct STesterActionDesc
@@ -1082,7 +1090,7 @@ void CTesterWindowContent::ShowDialog(ETesterDialog eDialog)
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowContent::ShowPropertiesDialog(void)
 {
-	CTesterDialog			cDialog;
+	CDialog					cDialog;
 	const char*				aszRotations[] = { "North", "East", "South", "West" };
 	CCircuitEditor*			pcEditor;
 	CComponentView*			pcComponent;
@@ -1201,7 +1209,7 @@ void CTesterWindowContent::ShowPropertiesDialog(void)
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowContent::ShowNewSubcircuitDialog(void)
 {
-	CTesterDialog		cDialog;
+	CDialog				cDialog;
 	Ptr<CTextField>		pName;
 	char*				szName;
 
@@ -1231,7 +1239,7 @@ void CTesterWindowContent::ShowNewSubcircuitDialog(void)
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowContent::ShowNewSimulationDialog(void)
 {
-	CTesterDialog		cDialog;
+	CDialog				cDialog;
 	Ptr<CTextField>		pName;
 	CChars				szDefault;
 	char*				szName;
@@ -1315,11 +1323,11 @@ void CTesterWindowContent::ShowComponentChooser(void)
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowContent::ShowProjectDialog(bool bSave)
 {
-	CTesterFileChooser	cChooser;
+	CFileChooser		cChooser;
 	char*				szFilename;
 	bool				bResult;
 
-	cChooser.Init(mpWindow, &msDialogLook, bSave ? "Save Project" : "Load Project", bSave, mszProjectFilename.Text(), mapIcons.Get(TA_LoadProject), mpFileIcon);
+	cChooser.Init(mpWindow, &msDialogLook, bSave ? "Save Project" : "Load Project", bSave, mszProjectFilename.Text(), gasProjectFileTypes, sizeof(gasProjectFileTypes) / sizeof(SFileChooserType), mapIcons.Get(TA_LoadProject), mpFileIcon);
 	if (cChooser.Show())
 	{
 		szFilename = cChooser.GetChosen();
