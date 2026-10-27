@@ -17,6 +17,9 @@ class CCircuitEditor;
 //place components, as Logicim's KeyInputsFactory (g a ground, v a supply, p a pin, c a constant; with shift: A an AND
 //gate, O an OR, X an XOR, N an inverter, C a clock, P a probe, S a splitter, T a tunnel, L a label and F a flip flop).
 //Logicim's control and alt placements aren't printable keys and aren't here.
+//
+//Ctrl+Z undoes back to before the last change that wasn't only to the selection and Ctrl+Y redoes forward to after the
+//next one; with shift they step one change at a time, as Logicim's do (see CCircuitEditor::Undo).
 class CCircuitCanvas : public CCanvas
 {
 CONSTRUCTABLE(CCircuitCanvas);
@@ -37,17 +40,24 @@ public:
 	Ptr<CCircuitCanvasDraw>		GetCircuitDraw(void);
 
 	void						MovedOver(int x, int y) override;
-	bool						Wheel(int iRight, int iDown) override;
-	void						ActivateComponent(int x, int y) override;
-	void						ExecuteComponent(int x, int y) override;
-	void						StartDragSelect(int x, int y) override;
-	void						ContDragSelect(int x, int y) override;
-	void						StopDragSelect(int x, int y) override;
-	void						StartDragScroll(int x, int y) override;
-	void						ContDragScroll(int x, int y) override;
-	void						Delete(void) override;
-	void						ClearSelection(void) override;
-	void						Printable(char c, bool bInsert) override;
+	void						CommandAction(SComponentInputEvent* psEvent);
+	void						PrintableAction(SComponentInputEvent* psEvent);
+	void						WheelAction(SComponentInputEvent* psEvent);
+	bool						Wheel(int iRight, int iDown);
+	void						ActivateComponent(int x, int y);
+	void						ExecuteComponent(int x, int y);
+	void						StartDragSelect(int x, int y);
+	void						ContDragSelect(int x, int y);
+	void						StopDragSelect(int x, int y);
+	void						StartDragScroll(int x, int y);
+	void						ContDragScroll(int x, int y);
+	void						Delete(void);
+	void						ClearSelection(void);
+	void						Printable(char c, bool bInsert);
+	void						Undo(void);
+	void						StepUndo(void);
+	void						Redo(void);
+	void						StepRedo(void);
 
 protected:
 	SFloat64Vec2				ToGrid(int x, int y);

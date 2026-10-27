@@ -153,6 +153,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		CTesterWindowContent	cContent;
 		CInput					cInput;
 		CWinInput				cWinInput;
+		Ptr<CWindowInputSource>	pInputSource;
 		CComponentInput			cComponentInput;
 
 		cNativeFactory.Init(&gcMemoryAllocator,
@@ -179,7 +180,8 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			cInput.AddNativeInput(&cWinInput);
 			cNativeFactory.SetRawInput(WinRawInputCallback, cWinInput.GetRaw());
 
-			cComponentInput.Init(&cInput, &pTesterWindow);
+			pInputSource = OMalloc<CWindowInputSource>(&cInput);
+			cComponentInput.Init(&pInputSource, &pTesterWindow);
 			cComponentInput.AddKeyboards();
 			cComponentInput.AddMice();
 			pTesterWindow->SetComponentInput(&cComponentInput);
@@ -190,6 +192,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pTesterWindow->SetComponentInput(NULL);
 			cNativeFactory.SetRawInput(NULL, NULL);
 			cComponentInput.Kill();
+			pInputSource = NULL;
 			cInput.Kill();
 			cWinInput.Kill();
 		}

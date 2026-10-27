@@ -12,6 +12,13 @@
 #define CIRCUIT_CANVAS_DOUBLE_CLICK_PIXELS			4
 
 
+static EComponentInputCommand	gaeCircuitCanvasCommands[] =
+{
+	CIC_ActivateComponent, CIC_ExecuteComponent, CIC_StartDragSelect, CIC_ContDragSelect, CIC_StopDragSelect,
+	CIC_StartDragScroll, CIC_ContDragScroll, CIC_Delete, CIC_ClearSelection, CIC_Undo, CIC_StepUndo, CIC_Redo, CIC_StepRedo,
+};
+
+
 //////////////////////////////////////////////////////////////////////////
 //
 // The canvas takes focus when clicked, so the keys come to it.
@@ -29,7 +36,61 @@ void CCircuitCanvas::Init(Ptr<CWindow> pWindow, Ptr<CCircuitCanvasDraw> pDraw, C
 	miLastRelease = 0;
 	msLastRelease.Init(0, 0);
 	SetCanGetFocus(true);
+	AddInputActions(gaeCircuitCanvasCommands, sizeof(gaeCircuitCanvasCommands) / sizeof(EComponentInputCommand), this, &CCircuitCanvas::CommandAction);
+	AddInputAction(IAF_Printable, NULL, this, &CCircuitCanvas::PrintableAction);
+	AddInputAction(IAF_Wheel, NULL, this, &CCircuitCanvas::WheelAction);
 	PostInit();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// The input actions of gaeCircuitCanvasCommands.
+//
+//////////////////////////////////////////////////////////////////////////
+void CCircuitCanvas::CommandAction(SComponentInputEvent* psEvent)
+{
+	switch (psEvent->eCommand)
+	{
+	case CIC_ActivateComponent:	ActivateComponent(psEvent->x, psEvent->y);	break;
+	case CIC_ExecuteComponent:	ExecuteComponent(psEvent->x, psEvent->y);	break;
+	case CIC_StartDragSelect:	StartDragSelect(psEvent->x, psEvent->y);	break;
+	case CIC_ContDragSelect:	ContDragSelect(psEvent->x, psEvent->y);		break;
+	case CIC_StopDragSelect:	StopDragSelect(psEvent->x, psEvent->y);		break;
+	case CIC_StartDragScroll:	StartDragScroll(psEvent->x, psEvent->y);	break;
+	case CIC_ContDragScroll:	ContDragScroll(psEvent->x, psEvent->y);		break;
+	case CIC_Delete:			Delete();									break;
+	case CIC_ClearSelection:	ClearSelection();							break;
+	case CIC_Undo:				Undo();										break;
+	case CIC_StepUndo:			StepUndo();									break;
+	case CIC_Redo:				Redo();										break;
+	case CIC_StepRedo:			StepRedo();									break;
+	default:					break;
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CCircuitCanvas::PrintableAction(SComponentInputEvent* psEvent)
+{
+	Printable(psEvent->cPrintable, psEvent->bInsert);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// The canvas only zooms, so the wheel sideways goes on to its parent.
+//
+//////////////////////////////////////////////////////////////////////////
+void CCircuitCanvas::WheelAction(SComponentInputEvent* psEvent)
+{
+	if (!Wheel(psEvent->iRight, psEvent->iDown))
+	{
+		psEvent->bPass = true;
+	}
 }
 
 
@@ -265,6 +326,17 @@ void CCircuitCanvas::Printable(char c, bool bInsert)
 	}
 	mpcEditor->StartPlaceComponent(szXMLName);
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Ctrl+Z, Ctrl+Shift+Z, Ctrl+Y and Ctrl+Shift+Y.
+//
+//////////////////////////////////////////////////////////////////////////
+void CCircuitCanvas::Undo(void) { mpcContent->Undo(false); }
+void CCircuitCanvas::StepUndo(void) { mpcContent->Undo(true); }
+void CCircuitCanvas::Redo(void) { mpcContent->Redo(false); }
+void CCircuitCanvas::StepRedo(void) { mpcContent->Redo(true); }
 
 
 //////////////////////////////////////////////////////////////////////////

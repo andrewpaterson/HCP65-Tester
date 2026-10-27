@@ -13,6 +13,7 @@
 #include "WindowLib/FillContainer.h"
 #include "WindowLib/RoundedBoxCanvasDraw.h"
 #include "TesterComponentChooser.h"
+#include "TesterFileChooser.h"
 #include "LogicimLib/ComponentProperties.h"
 #include "MicroprocessorLib/LongTime.h"
 #include "TesterWindowContent.h"
@@ -195,6 +196,7 @@ void CTesterWindowContent::Kill(void)
 	maMenuItems.Kill();
 	maiMenuItemActions.Kill();
 	mapIcons.Kill();
+	mpFileIcon = NULL;
 	maSubcircuitLabels.Kill();
 	maSimulationLabels.Kill();
 	msDialogLook.Kill();
@@ -205,6 +207,7 @@ void CTesterWindowContent::Kill(void)
 	mpTheme = NULL;
 
 	mpMenuBar = NULL;
+	mpEditMenu = NULL;
 	mpSubcircuits = NULL;
 	mpSimulations = NULL;
 	mpCircuit = NULL;
@@ -236,9 +239,7 @@ void CTesterWindowContent::Kill(void)
 //////////////////////////////////////////////////////////////////////////
 bool CTesterWindowContent::LoadIcons(const char* szIconDirectory)
 {
-	CFileUtil			cFileUtil;
-	CChars				szFilename;
-	Ptr<CImage>			pImage;
+	Ptr<CImageCel>		pIcon;
 	int					i;
 	bool				bResult;
 
@@ -251,24 +252,48 @@ bool CTesterWindowContent::LoadIcons(const char* szIconDirectory)
 			continue;
 		}
 
-		szFilename.Init(szIconDirectory);
-		cFileUtil.AppendToPath(&szFilename, gasTesterActions[i].szIcon);
-		szFilename.Append("_24.png");
-		pImage = ReadImage(szFilename.Text());
-		if (pImage.IsNull())
+		pIcon = ReadIcon(szIconDirectory, gasTesterActions[i].szIcon);
+		if (pIcon.IsNull())
 		{
-			gcLogger.Error2(__METHOD__, " Could not read icon [", szFilename.Text(), "].", NULL);
 			bResult = false;
-			mapIcons.Add(NULL);
 		}
-		else
-		{
-			pImage = CImageColourConverter::ConvertColour(pImage, mpWindow->GetColourOrder());
-			mapIcons.Add(OMalloc<CImageCel>(pImage));
-		}
-		szFilename.Kill();
+		mapIcons.Add(pIcon);
+	}
+
+	mpFileIcon = ReadIcon(szIconDirectory, "new_generic");
+	if (mpFileIcon.IsNull())
+	{
+		bResult = false;
 	}
 	return bResult;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// NULL if the icon can't be read.
+//
+//////////////////////////////////////////////////////////////////////////
+Ptr<CImageCel> CTesterWindowContent::ReadIcon(const char* szIconDirectory, const char* szIcon)
+{
+	CFileUtil			cFileUtil;
+	CChars				szFilename;
+	Ptr<CImage>			pImage;
+
+	szFilename.Init(szIconDirectory);
+	cFileUtil.AppendToPath(&szFilename, szIcon);
+	szFilename.Append("_24.png");
+	pImage = ReadImage(szFilename.Text());
+	if (pImage.IsNull())
+	{
+		gcLogger.Error2(__METHOD__, " Could not read icon [", szFilename.Text(), "].", NULL);
+		szFilename.Kill();
+		return NULL;
+	}
+	szFilename.Kill();
+
+	pImage = CImageColourConverter::ConvertColour(pImage, mpWindow->GetColourOrder());
+	return OMalloc<CImageCel>(pImage);
 }
 
 
@@ -332,7 +357,8 @@ Ptr<CComponent> CTesterWindowContent::CreateMenuBar(void)
 
 	mpMenuBar = OMalloc<CMenuBar>(mpWindow, mpTheme);
 	mpMenuBar->AddMenu("File", CreateMenu(aeFile, sizeof(aeFile) / sizeof(ETesterAction)));
-	mpMenuBar->AddMenu("Edit", CreateMenu(aeEdit, sizeof(aeEdit) / sizeof(ETesterAction)));
+	mpEditMenu = CreateMenu(aeEdit, sizeof(aeEdit) / sizeof(ETesterAction));
+	mpMenuBar->AddMenu("Edit", mpEditMenu);
 	mpMenuBar->AddMenu("View", CreateMenu(aeView, sizeof(aeView) / sizeof(ETesterAction)));
 	mpMenuBar->AddMenu("Simulation", CreateMenu(aeSimulation, sizeof(aeSimulation) / sizeof(ETesterAction)));
 	mpMenuBar->AddMenu("Place", CreateMenu(aePlace, sizeof(aePlace) / sizeof(ETesterAction)));
@@ -866,6 +892,12 @@ void CTesterWindowContent::DoAction(ETesterAction eAction)
 	case TA_AddLabel:
 		pcEditor->StartPlaceComponent("Label");
 		break;
+	case TA_Undo:
+		Undo(false);
+		break;
+	case TA_Redo:
+		Redo(false);
+		break;
 	case TA_Delete:
 		pcEditor->Delete();
 		break;
@@ -934,6 +966,72 @@ void CTesterWindowContent::Tick(int64 iUpdateTimeInMilliseconds)
 	if (mbRunning)
 	{
 		mcCircuit.Run(NanosecondsToTime(iUpdateTimeInMilliseconds * mfNanosecondsPerMillisecond));
+	}
+	UpdateEditMenu();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Ctrl+Z, or the menu's Undo, goes back to before the last change that
+// wasn't only to the selection; bStep (Ctrl+Shift+Z) goes back one change.
+// The simulation goes back with the circuit, but keeps running or paused.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterWindowContent::Undo(bool bStep)
+{
+	mcCircuit.GetEditor()->Undo(bStep);
+	UpdateInfo();
+	UpdateEditMenu();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Ctrl+Y, or the menu's Redo; bStep is Ctrl+Shift+Y.  As Undo.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterWindowContent::Redo(bool bStep)
+{
+	mcCircuit.GetEditor()->Redo(bStep);
+	UpdateInfo();
+	UpdateEditMenu();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Greys the Edit menu's Undo and Redo when there's nothing to undo or
+// redo, or an edit is in progress.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterWindowContent::UpdateEditMenu(void)
+{
+	size			i;
+	ETesterAction	eAction;
+	int32			iRow;
+	bool			bEnabled;
+
+	if (mpEditMenu.IsNull())
+	{
+		return;
+	}
+
+	for (i = 0; i < maMenuItems.Size(); i++)
+	{
+		eAction = (ETesterAction)maiMenuItemActions.GetValue(i);
+		if ((eAction == TA_Undo) || (eAction == TA_Redo))
+		{
+			iRow = mpEditMenu->GetItemRow(maMenuItems.Get(i));
+			if (iRow >= 0)
+			{
+				bEnabled = (eAction == TA_Undo) ? mcCircuit.GetEditor()->CanUndo() : mcCircuit.GetEditor()->CanRedo();
+				if (mpEditMenu->IsRowEnabled(iRow) != bEnabled)
+				{
+					mpEditMenu->SetRowEnabled(iRow, bEnabled);
+				}
+			}
+		}
 	}
 }
 
@@ -1211,37 +1309,29 @@ void CTesterWindowContent::ShowComponentChooser(void)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Asks for the project file to load or save, the last one used to start
-// with.
+// Asks for the project file to load or save with Logicim's file chooser,
+// starting on the one last used.
 //
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowContent::ShowProjectDialog(bool bSave)
 {
-	CTesterDialog		cDialog;
-	Ptr<CTextField>		pFilename;
+	CTesterFileChooser	cChooser;
 	char*				szFilename;
 	bool				bResult;
 
-	cDialog.Init(mpWindow, &msDialogLook, bSave ? "Save Project" : "Load Project");
-	pFilename = cDialog.AddTextField("File", mszProjectFilename.Text());
-
-	if (cDialog.Show(TESTER_DIALOG_WIDTH))
+	cChooser.Init(mpWindow, &msDialogLook, bSave ? "Save Project" : "Load Project", bSave, mszProjectFilename.Text(), mapIcons.Get(TA_LoadProject), mpFileIcon);
+	if (cChooser.Show())
 	{
-		szFilename = pFilename->GetText();
-		if (szFilename[0] != '\0')
+		szFilename = cChooser.GetChosen();
+		mszProjectFilename.Set(szFilename);
+		bResult = bSave ? mcCircuit.Save(szFilename) : mcCircuit.Load(szFilename);
+		if (bResult)
 		{
-			mszProjectFilename.Set(szFilename);
-			bResult = bSave ? mcCircuit.Save(szFilename) : mcCircuit.Load(szFilename);
-			if (bResult)
-			{
-				gcLogger.Info2(bSave ? "Saved [" : "Loaded [", szFilename, "].", NULL);
-			}
-			UpdateInfo();
+			gcLogger.Info2(bSave ? "Saved [" : "Loaded [", szFilename, "].", NULL);
 		}
+		UpdateInfo();
 	}
-
-	pFilename = NULL;
-	cDialog.Kill();
+	cChooser.Kill();
 }
 
 

@@ -82,8 +82,10 @@ protected:
 	Ptr<CWindowTheme>		mpTheme;
 	STesterDialogLook		msDialogLook;
 	CArray<CImageCel>		mapIcons;  //One for each ETesterAction, NULL if the action has no icon.
+	Ptr<CImageCel>			mpFileIcon;  //Beside a file in the file chooser, Load Project's beside a folder.
 
 	Ptr<CMenuBar>			mpMenuBar;
+	Ptr<CMenuContainer>		mpEditMenu;  //Its undo and redo are greyed when there's nothing to undo or redo.
 	Ptr<CListContainer>		mpSubcircuits;
 	Ptr<CListContainer>		mpSimulations;
 	CArray<CLabel>			maSubcircuitLabels;  //The text of each row.
@@ -122,12 +124,15 @@ public:
 	void			PointerOverCircuit(int x, int y);
 	void			Zoom(float32 fZoom);
 	void			EditProperties(void);
+	void			Undo(bool bStep);
+	void			Redo(bool bStep);
 	void			ShowDialog(ETesterDialog eDialog);
 	void			Tick(int64 iUpdateTimeInMilliseconds);
 
 protected:
 	Ptr<CFont>				GenerateFont(const char* szFontFilename, const char* szName, float32 fPixelSize, EColourOrder eOrder);
 	bool					LoadIcons(const char* szIconDirectory);
+	Ptr<CImageCel>			ReadIcon(const char* szIconDirectory, const char* szIcon);
 	void					CreateLooks(void);
 
 	Ptr<CComponent>			CreateMenuBar(void);
@@ -147,6 +152,7 @@ protected:
 
 	void					DoAction(ETesterAction eAction);
 	void					UpdateInfo(void);
+	void					UpdateEditMenu(void);
 	void					ShowPropertiesDialog(void);
 	void					ShowNewSubcircuitDialog(void);
 	void					ShowNewSimulationDialog(void);

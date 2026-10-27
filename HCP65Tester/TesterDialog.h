@@ -35,12 +35,22 @@ public:
 };
 
 
+//Asked whether OK may close a dialog, as a file chooser opens the folder typed in it instead.
+class CTesterDialogApprover
+{
+public:
+	virtual bool	Approve(void) = 0;
+};
+
+
 //A form in its own window, shown modally over the tester's window, like Logicim's property editor dialogs but in
 //IntelliJ's style: a label and an editor on each row, dividers with a title between groups of rows, and the buttons
 //along the bottom on the right.  OK is the default button, enter clicks it; escape clicks Cancel.
 //
 //A dialog that isn't a form of rows sets a body instead, which fills the dialog above the buttons, and is shown at a
 //size of its own.
+//
+//OK can have another caption, like a file chooser's Open, and an approver, but it still closes the dialog as OK.
 //
 //The dialog's window is in the root while the dialog exists.
 class CTesterDialog : public CButtonListener
@@ -56,6 +66,7 @@ protected:
 	Ptr<CButton>			mpCancel;
 	Ptr<CButton>			mpExtra;  //Like Save Defaults, NULL if there isn't one.
 	Ptr<CComponent>			mpFirstEditor;  //Has focus when the dialog opens.
+	CTesterDialogApprover*	mpcApprover;  //NULL if OK always closes the dialog.
 	CChars					mszClicked;
 	int						miRows;
 
@@ -70,6 +81,8 @@ public:
 	void				AddDivider(const char* szTitle);
 	void				AddExtraButton(const char* szCaption);
 	void				SetBody(Ptr<CComponent> pBody, Ptr<CComponent> pFirstEditor);
+	void				SetOKCaption(const char* szCaption);
+	void				SetApprover(CTesterDialogApprover* pcApprover);
 
 	bool				Show(int32 iWidth);
 	bool				Show(int32 iWidth, int32 iHeight);

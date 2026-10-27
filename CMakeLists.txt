@@ -104,6 +104,7 @@ set(TESTER_SOURCES
 	"${TESTER_DIR}/TesterCircuit.cpp"
 	"${TESTER_DIR}/TesterDialog.cpp"
 	"${TESTER_DIR}/TesterComponentChooser.cpp"
+	"${TESTER_DIR}/TesterFileChooser.cpp"
 	"${TESTER_DIR}/TesterButtonListener.cpp"
 	"${TESTER_DIR}/TesterWindowContent.cpp"
 	"${TESTER_DIR}/TesterWindowData.cpp"

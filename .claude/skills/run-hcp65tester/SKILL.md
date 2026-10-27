@@ -75,12 +75,8 @@ its project folder, results at the end of `Log.txt`):
   centre the mapping assumes moves.
 - **The canvas mapping is constants** for the default 1280x800 client: canvas centre at client (740,347), zoom
   buttons at (20,148) in and (20,224) reset. Check a mapping by moving there and reading X/Y in the status bar.
-- **Logicim's D flip flop doesn't start by itself.** It only drives Q and QB when its state changes, and the state
-  starts low, so a fresh one has undriven (grey) outputs; with QB fed to D, D floats and clocks do nothing. Holding
-  SD and RD at 3.3V doesn't help (that's "not asserted"). Pull SD low once (wire a ground, then delete it) to start
-  it, after which Q toggles at half the clock rate.
-- Grey wires and port dots are undriven; dark/bright green are low/high. Sample twice a few hundred ms apart to see
-  a clock or divider move.
+- Grey wires and port dots are undriven; dark/bright green are low/high. Sample several screenshots a few hundred
+  ms apart to see a clock or divider move: the flip flop divider above shows Q changing within four shots.
 
 ## Troubleshooting
 

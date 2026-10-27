@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
 		CTesterWindowContent	cContent;
 		CInput					cInput;
 		CX11Input				cX11Input;
+		Ptr<CWindowInputSource>	pInputSource;
 		CComponentInput			cComponentInput;
 
 		bResult = cNativeFactory.Init(&gcMemoryAllocator, NULL);
@@ -70,7 +71,8 @@ int main(int argc, char* argv[])
 				cInput.AddNativeInput(&cX11Input);
 				cNativeFactory.SetInput(&cX11Input);
 
-				cComponentInput.Init(&cInput, &pTesterWindow);
+				pInputSource = OMalloc<CWindowInputSource>(&cInput);
+				cComponentInput.Init(&pInputSource, &pTesterWindow);
 				cComponentInput.AddKeyboards();
 				cComponentInput.AddMice();
 				pTesterWindow->SetComponentInput(&cComponentInput);
@@ -81,6 +83,7 @@ int main(int argc, char* argv[])
 				pTesterWindow->SetComponentInput(NULL);
 				cNativeFactory.SetInput(NULL);
 				cComponentInput.Kill();
+				pInputSource = NULL;
 				cInput.Kill();
 				cX11Input.Kill();
 			}

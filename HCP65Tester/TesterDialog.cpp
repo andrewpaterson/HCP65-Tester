@@ -60,6 +60,7 @@ void CTesterDialog::Init(Ptr<CWindow> pOwner, STesterDialogLook* psLook, const c
 
 	mpsLook = psLook;
 	mpOwner = pOwner;
+	mpcApprover = NULL;
 	mszClicked.Init();
 	miRows = 0;
 
@@ -113,6 +114,7 @@ void CTesterDialog::Kill(void)
 
 	mpExtra = NULL;
 	mpFirstEditor = NULL;
+	mpcApprover = NULL;
 	mpOK = NULL;
 	mpCancel = NULL;
 	mpButtons = NULL;
@@ -297,6 +299,27 @@ void CTesterDialog::SetBody(Ptr<CComponent> pBody, Ptr<CComponent> pFirstEditor)
 
 //////////////////////////////////////////////////////////////////////////
 //
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterDialog::SetOKCaption(const char* szCaption)
+{
+	mpOK->SetCaption(szCaption);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// OK, or enter, only closes the dialog if the approver approves.
+//
+//////////////////////////////////////////////////////////////////////////
+void CTesterDialog::SetApprover(CTesterDialogApprover* pcApprover)
+{
+	mpcApprover = pcApprover;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
 // Shows the dialog iWidth wide and as tall as its rows and buttons.
 // Returns true if OK closed it.
 //
@@ -332,11 +355,20 @@ bool CTesterDialog::Show(int32 iWidth, int32 iHeight)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Every button closes the dialog.
+// Every button closes the dialog, OK as "OK" whatever its caption unless
+// the approver stops it.
 //
 //////////////////////////////////////////////////////////////////////////
 void CTesterDialog::ButtonClicked(CUnknown* pcSource, void* pvContext)
 {
+	if (&mpOK == pcSource)
+	{
+		if ((mpcApprover == NULL) || mpcApprover->Approve())
+		{
+			Close("OK");
+		}
+		return;
+	}
 	Close(((CButton*)pcSource)->GetCaption());
 }
 
