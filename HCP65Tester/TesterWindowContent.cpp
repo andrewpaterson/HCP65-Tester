@@ -385,7 +385,7 @@ Ptr<CButton> CTesterWindowContent::CreateToolButton(ETesterAction eAction)
 {
 	Ptr<CButton>	pButton;
 
-	pButton = OMalloc<CButton>(mpWindow, mpTheme, BL_Tool, mapIcons.Get(eAction), (const char*)NULL);
+	pButton = OMalloc<CButton>(mpWindow, mpTheme, BL_Flat, mapIcons.Get(eAction), (const char*)NULL);
 	pButton->SetPadding(0, 0);
 	pButton->SetShowsPushed(true);
 	pButton->AddListener(&mcButtonListener);

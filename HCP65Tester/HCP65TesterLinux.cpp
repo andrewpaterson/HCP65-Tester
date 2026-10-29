@@ -1,5 +1,4 @@
 #include "BaseLib/Logger.h"
-#include "BaseLib/FastFunctions.h"
 #include "BaseLib/TypeNames.h"
 #include "BaseLib/TypeConverter.h"
 #include "BaseLib/GlobalMemory.h"
@@ -26,7 +25,6 @@
 int main(int argc, char* argv[])
 {
 	gcLogger.Init();
-	FastFunctionsInit();
 	TypesInit();
 	TypeConverterInit();
 	MemoryInit();
@@ -111,7 +109,6 @@ int main(int argc, char* argv[])
 	MemoryKill();
 	TypeConverterKill();
 	TypesKill();
-	FastFunctionsKill();
 
 	gcLogger.Kill();
 

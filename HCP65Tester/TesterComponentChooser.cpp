@@ -4,7 +4,7 @@
 #include "WindowLib/FillContainer.h"
 #include "WindowLib/RoundedBoxCanvasDraw.h"
 #include "WindowLib/IconComponent.h"
-#include "WindowLib/JewelButtonImages.h"
+#include "WindowLib/JewelImageGenerator.h"
 #include "WindowLib/JewelColours.h"
 #include "LogicimLib/ComponentLibraries.h"
 #include "LogicimLib/ComponentPlacement.h"
@@ -101,8 +101,8 @@ void CTesterComponentChooser::Init(Ptr<CWindow> pOwner, SDialogLook* psLook, CTe
 
 	mcDialog.Init(pOwner, psLook, "Choose Component");
 	mcDialog.GetWindow()->GetColourFormat(&cFormat);
-	mpCollapsedChevron = CJewelButtonImages::CreateChevron(JEWEL_ICON, &cFormat);
-	mpExpandedChevron = CJewelButtonImages::CreateDownChevron(JEWEL_ICON, &cFormat);
+	mpCollapsedChevron = CJewelImageGenerator::CreateChevron(JEWEL_ICON, &cFormat);
+	mpExpandedChevron = CJewelImageGenerator::CreateDownChevron(JEWEL_ICON, &cFormat);
 	pBody = CreateBody();
 	mcDialog.SetBody(pBody, mpFilter);
 
