@@ -241,42 +241,22 @@
     <ClCompile Include="CommonBoard.cpp" />
     <ClCompile Include="HCP65Tester.cpp" />
     <ClCompile Include="TestBoard.cpp" />
-    <ClCompile Include="TesterButtonListener.cpp" />
-    <ClCompile Include="TesterWindowContent.cpp" />
-    <ClCompile Include="TesterWindowData.cpp" />
     <ClCompile Include="TesterWindowTick.cpp" />
     <ClCompile Include="UART.cpp" />
     <ClCompile Include="WindowsCOM.cpp" />
-    <ClCompile Include="CircuitCanvas.cpp" />
-    <ClCompile Include="CircuitCanvasDraw.cpp" />
-    <ClCompile Include="TesterComponentChooser.cpp" />
-    <ClCompile Include="TesterCircuit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AddressDecodeBoard.h" />
     <ClInclude Include="BoardPins.h" />
     <ClInclude Include="CommonBoard.h" />
     <ClInclude Include="TestBoard.h" />
-    <ClInclude Include="TesterButtonListener.h" />
-    <ClInclude Include="TesterWindowContent.h" />
-    <ClInclude Include="TesterWindowData.h" />
     <ClInclude Include="TesterWindowTick.h" />
     <ClInclude Include="UART.h" />
     <ClInclude Include="WindowsCOM.h" />
-    <ClInclude Include="CircuitCanvas.h" />
-    <ClInclude Include="CircuitCanvasDraw.h" />
-    <ClInclude Include="TesterComponentChooser.h" />
-    <ClInclude Include="TesterCircuit.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CommonLibraries\BaseLib\BaseLib.vcxproj">
       <Project>{e25d2dac-0e80-42b2-8fa7-99b837cf7588}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\CommonLibraries\LogicimLib\LogicimLib.vcxproj">
-      <Project>{c3dff95a-5e3f-452f-b879-1af5257a94b4}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\CommonLibraries\MicroprocessorLib\MicroprocessorLib.vcxproj">
-      <Project>{0bf6f66e-80b2-44cf-897c-0f305aaf6af0}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\InputLib\InputLib.vcxproj">
       <Project>{2f64aa34-f1cc-43fe-90ee-90e66824ee55}</Project>
@@ -286,9 +266,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\SupportLib\SupportLib.vcxproj">
       <Project>{221022f1-b103-456a-8f55-721f33f2e26d}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\CommonLibraries\WinInputLib\WinInputLib.vcxproj">
-      <Project>{efe4d8a4-d7f4-4ba2-9f43-0e3bc02268c2}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\WindowLib\WindowLib.vcxproj">
       <Project>{b5d4c7aa-49ef-45d2-b970-0ab1f1184ae6}</Project>

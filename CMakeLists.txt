@@ -1,6 +1,5 @@
-# Linux build of the HCP65 Tester's window (BaseLib + StandardLib + SupportLib +
-# InputLib + WindowLib + X11Lib + MicroprocessorLib + LogicimLib + the tester's
-# window sources).  The board and its COM port are Windows only and are left
+# Linux build of the HCP65 Tester's empty window (BaseLib + StandardLib +
+# SupportLib + InputLib + WindowLib + X11Lib + the tester's window sources).  The board and its COM port are Windows only and are left
 # out.
 #
 # 64-bit only: there is no 32-bit libX11 installed.  Needs libx11-dev.
@@ -35,8 +34,6 @@ set(SUPPORTLIB_DIR "${COMMON_DIR}/SupportLib")
 set(INPUTLIB_DIR "${COMMON_DIR}/InputLib")
 set(WINDOWLIB_DIR "${COMMON_DIR}/WindowLib")
 set(X11LIB_DIR "${COMMON_DIR}/X11Lib")
-set(MICROPROCESSORLIB_DIR "${COMMON_DIR}/MicroprocessorLib")
-set(LOGICIMLIB_DIR "${COMMON_DIR}/LogicimLib")
 set(TESTER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/HCP65Tester")
 
 
@@ -93,19 +90,10 @@ vcxproj_sources(INPUTLIB_SOURCES "${INPUTLIB_DIR}/InputLib.vcxproj")
 vcxproj_sources(WINDOWLIB_SOURCES "${WINDOWLIB_DIR}/WindowLib.vcxproj")
 
 vcxproj_sources(X11LIB_SOURCES "${X11LIB_DIR}/X11Lib.vcxproj")
-vcxproj_sources(MICROPROCESSORLIB_SOURCES "${MICROPROCESSORLIB_DIR}/MicroprocessorLib.vcxproj")
-vcxproj_sources(LOGICIMLIB_SOURCES "${LOGICIMLIB_DIR}/LogicimLib.vcxproj")
 
 # Only the window's sources; HCP65Tester.cpp (WinMain) and the board's are Windows only.
 set(TESTER_SOURCES
 	"${TESTER_DIR}/HCP65TesterLinux.cpp"
-	"${TESTER_DIR}/CircuitCanvas.cpp"
-	"${TESTER_DIR}/CircuitCanvasDraw.cpp"
-	"${TESTER_DIR}/TesterCircuit.cpp"
-	"${TESTER_DIR}/TesterComponentChooser.cpp"
-	"${TESTER_DIR}/TesterButtonListener.cpp"
-	"${TESTER_DIR}/TesterWindowContent.cpp"
-	"${TESTER_DIR}/TesterWindowData.cpp"
 	"${TESTER_DIR}/TesterWindowTick.cpp"
 )
 
@@ -166,10 +154,6 @@ target_link_libraries(WindowLib PUBLIC InputLib SupportLib StandardLib BaseLib)
 add_library(X11Lib STATIC ${X11LIB_SOURCES})
 target_link_libraries(X11Lib PUBLIC WindowLib InputLib SupportLib StandardLib BaseLib X11::X11)
 
-add_library(MicroprocessorLib STATIC ${MICROPROCESSORLIB_SOURCES})
-target_link_libraries(MicroprocessorLib PUBLIC StandardLib BaseLib)
-add_library(LogicimLib STATIC ${LOGICIMLIB_SOURCES})
-target_link_libraries(LogicimLib PUBLIC SupportLib MicroprocessorLib StandardLib BaseLib)
 add_executable(HCP65Tester ${TESTER_SOURCES})
 target_include_directories(HCP65Tester PRIVATE "${TESTER_DIR}")
-target_link_libraries(HCP65Tester PRIVATE X11Lib WindowLib InputLib LogicimLib MicroprocessorLib SupportLib StandardLib BaseLib)
+target_link_libraries(HCP65Tester PRIVATE X11Lib WindowLib InputLib SupportLib StandardLib BaseLib)

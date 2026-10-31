@@ -7,15 +7,6 @@
     <ClCompile Include="TesterWindowTick.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="TesterWindowContent.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="TesterButtonListener.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="TesterWindowData.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="WindowsCOM.cpp">
       <Filter>Source\UART</Filter>
     </ClCompile>
@@ -33,18 +24,6 @@
     </ClCompile>
     <ClCompile Include="CommonBoard.cpp">
       <Filter>Source\Specific</Filter>
-    </ClCompile>
-    <ClCompile Include="CircuitCanvas.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="CircuitCanvasDraw.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="TesterCircuit.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="TesterComponentChooser.cpp">
-      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,15 +44,6 @@
     <ClInclude Include="TesterWindowTick.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="TesterWindowContent.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="TesterButtonListener.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="TesterWindowData.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="WindowsCOM.h">
       <Filter>Source\UART</Filter>
     </ClInclude>
@@ -91,18 +61,6 @@
     </ClInclude>
     <ClInclude Include="CommonBoard.h">
       <Filter>Source\Specific</Filter>
-    </ClInclude>
-    <ClInclude Include="CircuitCanvas.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="CircuitCanvasDraw.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="TesterCircuit.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="TesterComponentChooser.h">
-      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
