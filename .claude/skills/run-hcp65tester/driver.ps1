@@ -37,17 +37,17 @@ $HcpZoomFile = "$env:TEMP\hcp65-driver-zoom.txt"
 $Script:HcpPixelsPerGrid = if (Test-Path $HcpZoomFile) { [int](Get-Content $HcpZoomFile) } else { 10 }
 function Save-PixelsPerGrid([int]$Pixels) { $Script:HcpPixelsPerGrid = $Pixels; Set-Content -Path $HcpZoomFile -Value $Pixels }
 
-function Get-TesterWindow { (Get-Process "HCP65 Tester" -ErrorAction Stop | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1).MainWindowHandle }
+function Get-TesterWindow { (Get-Process "HCP65Tester" -ErrorAction Stop | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1).MainWindowHandle }
 
 # Launches a built configuration from the project folder (it loads Resources\ relative to it) and waits for the window.
 # A tester already running is stopped first, so there's only ever one window to drive.
 function Start-Tester([string]$Config = "Debug", [string]$Platform = "x64") {
-  if (Get-Process "HCP65 Tester" -ErrorAction SilentlyContinue) { Stop-Tester; Start-Sleep -Seconds 1 }
+  if (Get-Process "HCP65Tester" -ErrorAction SilentlyContinue) { Stop-Tester; Start-Sleep -Seconds 1 }
   $dir = if ($Platform -eq "x64") { "$HcpUnit\x64\$Config" } else { "$HcpUnit\$Config" }
-  Start-Process -FilePath "$dir\HCP65 Tester.exe" -WorkingDirectory "$HcpUnit\HCP65Tester" | Out-Null
+  Start-Process -FilePath "$dir\HCP65Tester.exe" -WorkingDirectory "$HcpUnit\HCP65Tester" | Out-Null
   for ($i = 0; $i -lt 50; $i++) {
     Start-Sleep -Milliseconds 200
-    $p = Get-Process "HCP65 Tester" -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }
+    $p = Get-Process "HCP65Tester" -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }
     if ($p) { break }
   }
   Start-Sleep -Seconds 1
@@ -57,7 +57,7 @@ function Start-Tester([string]$Config = "Debug", [string]$Platform = "x64") {
   Focus-Tester
 }
 
-function Stop-Tester { Stop-Process -Name "HCP65 Tester" -Confirm:$false -ErrorAction SilentlyContinue }
+function Stop-Tester { Stop-Process -Name "HCP65Tester" -Confirm:$false -ErrorAction SilentlyContinue }
 
 function Focus-Tester { [HcpU]::SetForegroundWindow((Get-TesterWindow)) | Out-Null; Start-Sleep -Milliseconds 200 }
 

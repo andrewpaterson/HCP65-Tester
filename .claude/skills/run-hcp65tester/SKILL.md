@@ -14,10 +14,10 @@ Use the **PowerShell** tool (Windows PowerShell 5.1), not Bash: the driver is a 
 ## Build
 
 ```powershell
-& "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe" "D:\gameengine\HCP65Tester\HCP65 Tester.sln" /p:Configuration=Debug /p:Platform=x64 /m /v:minimal /nologo | Select-String "Tester.exe| error "
+& "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe" "D:\gameengine\HCP65Tester\HCP65Tester.sln" /p:Configuration=Debug /p:Platform=x64 /m /v:minimal /nologo | Select-String "Tester.exe| error "
 ```
 
-The exe lands in `x64\Debug\HCP65 Tester.exe` (Win32 configurations in `Debug\` / `Release\`).
+The exe lands in `x64\Debug\HCP65Tester.exe` (Win32 configurations in `Debug\` / `Release\`).
 
 ## Run (agent path)
 
@@ -53,7 +53,7 @@ QB (4,1). A clock's output is one unit right of it; a 3.3V supply placed at (-10
 
 ## Run (human path)
 
-Launch `x64\Debug\HCP65 Tester.exe` with the working directory `HCP65Tester\HCP65Tester\`. The simulation starts
+Launch `x64\Debug\HCP65Tester.exe` with the working directory `HCP65Tester\HCP65Tester\`. The simulation starts
 running ("View Path: Top (running)" in the status bar).
 
 ## Test
