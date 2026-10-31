@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{77E2AEC3-33E8-49E1-B815-92BB12193115}</ProjectGuid>
-    <RootNamespace>HCP65 Tester</RootNamespace>
+    <RootNamespace>HCP65Tester</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

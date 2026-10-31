@@ -25,7 +25,7 @@ LANGUAGE 9, 1
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 
-IDI_HCP65_TESTER       ICON         "HCP65 Tester.ico"
+IDI_HCP65_TESTER       ICON         "HCP65Tester.ico"
 IDI_SMALL               ICON         "small.ico"
 
 /////////////////////////////////////////////////////////////////////////////
