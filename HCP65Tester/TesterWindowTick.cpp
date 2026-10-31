@@ -8,9 +8,9 @@
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowTick::Init(void)
 {
-    PreInit();
-    CWindowTick::Init();
-    PostInit();
+	PreInit();
+	CWindowTick::Init();
+	PostInit();
 }
 
 
@@ -20,5 +20,5 @@ void CTesterWindowTick::Init(void)
 //////////////////////////////////////////////////////////////////////////
 void CTesterWindowTick::Tick(Ptr<CWindow> pWindow, int64 iUpdateTimeInMillieconds, int64 iTotalTimeInMillieconds)
 {
-    pWindow->Paint();
+	pWindow->Paint();
 }
